@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Kopi pilihan{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">DARI KEBUN PILIHAN, DISANGRAI SEGAR</p>
+    <h1>Temukan ritual seduh favoritmu.</h1>
+    <p>Jelajahi kopi nusantara dan alat seduh pilihan, dikirim langsung dari roastery kami.</p>
+    <a class="button button-light" href="#katalog">Jelajahi katalog <span aria-hidden="true">→</span></a>
+  </div>
+  <img src="{{ url_for('static', filename='img/coffee-bag.svg') }}" alt="" class="hero-art">
+</section>
+<section id="katalog" class="section-heading">
+  <div><p class="eyebrow">KATALOG KOPILAB</p><h2>Favorit para penikmat kopi</h2></div>
+  <span class="muted">{{ products|length }} produk tersedia</span>
+</section>
+<div class="product-grid">
+  {% for product in products %}
+    <article class="product-card">
+      <a class="product-image" href="{{ url_for('shop.product', pid=product['id']) }}">
+        <span class="product-tag">{{ product['category'] }}</span>
+        <img src="{{ url_for('static', filename='img/' + product['image']) }}" alt="{{ product['name'] }}">
+      </a>
+      <div class="product-info">
+        <p class="rating" aria-label="Rating {{ product['rating'] }} dari 5">★★★★★ <span>({{ product['review_count'] }})</span></p>
+        <h3><a href="{{ url_for('shop.product', pid=product['id']) }}">{{ product['name'] }}</a></h3>
+        <p class="product-description">{{ product['description'] }}</p>
+        <div class="product-buy"><strong>Rp {{ "{:,.0f}".format(product['price']).replace(",", ".") }}</strong>
+          <form method="post" action="{{ url_for('shop.cart') }}">
+            <input type="hidden" name="product_id" value="{{ product['id'] }}">
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="quantity" value="1">
+            <button class="icon-button" type="submit" aria-label="Tambah {{ product['name'] }} ke keranjang">+</button>
+          </form>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+</div>
+<section class="store-promo">
+  <div><p class="eyebrow">BELAJAR SAMBIL MENJELAJAH</p><h2>Di balik toko ini ada beberapa lab keamanan.</h2><p>Kenali bug web dengan aman, langsung di aplikasi lokal.</p></div>
+  <a class="button button-outline" href="{{ url_for('labs.labs') }}">Lihat semua lab</a>
+</section>
+{% endblock %}

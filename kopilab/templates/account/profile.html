@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Akun saya{% endblock %}
+{% block content %}<section class="page-heading"><p class="eyebrow">AKUN SAYA</p><h1>Halo, {{ user['username'] }}</h1><p class="muted">Kelola profil, wishlist, dan pesananmu.</p></section>
+<div class="account-grid"><section class="account-card"><h2>Informasi akun</h2><p><span>Email</span> {{ user['email'] }}</p><p><span>Role</span> {{ user['role'] }}</p><p><span>Saldo</span> Rp {{ "{:,.0f}".format(user['balance']).replace(",", ".") }}</p>
+{% if flags %}{% for flag in flags %}<p class="flag">{{ flag }}</p>{% endfor %}{% endif %}</section>
+<section class="account-card"><h2>Ubah profil</h2><form method="post" action="{{ url_for('account.profile') }}" class="stack-form"><label>Email<input name="email" value="{{ user['email'] }}"></label><button class="button button-primary">Simpan perubahan</button></form></section>
+<section class="account-card"><h2>Pintasan</h2><a href="{{ url_for('account.orders') }}">Riwayat pesanan</a><a href="{{ url_for('shop.wishlist') }}">Wishlist</a><a href="{{ url_for('shop.cart') }}">Keranjang</a></section>
+<section class="account-card"><h2>Transfer saldo</h2><form method="post" action="{{ url_for('account.transfer') }}" class="stack-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Username penerima<input name="to" required></label><label>Jumlah<input name="amount" type="number" required></label><button class="button button-outline">Kirim transfer</button></form></section></div>{% endblock %}

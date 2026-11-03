@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Scoreboard{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">PROGRES DI DATABASE</p><h1>Scoreboard KopiLab</h1><p class="muted">Nama pelajar disamarkan. Progres tersimpan di SQLite lokal, bukan di cookie.</p></section>
+{% if entries %}<div class="table-wrap"><table class="data-table"><thead><tr><th>Peringkat</th><th>Pelajar</th><th>Lab selesai</th><th>Terakhir selesai</th></tr></thead><tbody>
+{% for entry in entries %}<tr><td>{{ loop.index }}</td><td>{{ entry['name'] }}</td><td>{{ entry['solved'] }}/{{ lab_count }}</td><td>{{ entry['last_solved'] }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="empty-state"><h2>Belum ada flag yang diklaim.</h2><p>Jadilah pelajar pertama yang menyelesaikan lab.</p><a class="button button-primary" href="{{ url_for('labs.labs') }}">Mulai belajar</a></div>{% endif %}
+{% endblock %}

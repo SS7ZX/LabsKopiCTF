@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Transfer selesai{% endblock %}
+{% block content %}<section class="empty-state"><p class="eyebrow">AKUN SAYA</p><h1>{{ message }}</h1>{% if flag %}<p class="flag">{{ flag }}</p>{% endif %}<a class="button button-primary" href="{{ url_for('account.me') }}">Kembali ke akun</a></section>{% endblock %}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}KopiLab{% endblock %} | KopiLab</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="safety-banner"><strong>LAB LOKAL:</strong> {{ warning_banner }}</div>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('shop.index') }}"><span class="brand-mark">K</span><span>KopiLab<small>Roastery & Supply</small></span></a>
+    <form class="nav-search" action="{{ url_for('shop.search') }}">
+      <label class="sr-only" for="nav-q">Cari produk</label>
+      <input id="nav-q" name="q" value="{{ request.args.get('q', '') }}" placeholder="Cari kopi atau alat seduh">
+      <button class="search-button" type="submit" aria-label="Cari">Cari</button>
+    </form>
+    <nav class="main-nav" aria-label="Navigasi utama">
+      <a href="{{ url_for('shop.index') }}">Belanja</a>
+      <a href="{{ url_for('shop.cart') }}">Keranjang <span class="count">{{ cart_count }}</span></a>
+      <a href="{{ url_for('labs.labs') }}">Labs</a>
+      <a href="{{ url_for('labs.scoreboard') }}">Scoreboard</a>
+      {% if current_user %}
+        <a href="{{ url_for('account.me') }}">Hai, {{ current_user }}</a>
+        <a href="{{ url_for('auth.logout') }}">Keluar</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Masuk</a>
+      {% endif %}
+    </nav>
+    <form class="mode-form" method="post" action="{{ url_for('labs.toggle_mode') }}">
+      <span class="mode-label {{ 'secure' if secure_mode else 'vulnerable' }}">{{ "Secure" if secure_mode else "Vulnerable" }}</span>
+      <button class="mode-toggle" type="submit" aria-label="Ganti ke {{ 'Vulnerable' if secure_mode else 'Secure' }} mode">Ganti mode</button>
+    </form>
+  </header>
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" aria-live="polite">
+          {% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  {% if inspector_enabled %}
+  <aside class="inspector-panel">
+    <details>
+      <summary>Request Inspector <span>lokal · opsional</span></summary>
+      {% if last_inspection %}
+        <dl><dt>Request terakhir</dt><dd>{{ last_inspection['method'] }} {{ last_inspection['path'] }}</dd>
+        <dt>SQL terakhir</dt><dd><pre>{{ last_inspection['sql_text'] or "Tidak ada query SQL pada request ini." }}</pre></dd>
+        <dt>Header respons</dt><dd><pre>{{ last_inspection['response_headers'] }}</pre></dd></dl>
+      {% else %}<p>Belum ada request yang direkam.</p>{% endif %}
+    </details>
+  </aside>
+  {% endif %}
+  <footer class="site-footer">
+    <span>KopiLab Roastery & Supply</span>
+    <span>Toko simulasi untuk belajar keamanan aplikasi web.</span>
+    <a href="{{ url_for('files.preview') }}">Preview tautan</a>
+  </footer>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

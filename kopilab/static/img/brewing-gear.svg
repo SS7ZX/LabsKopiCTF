@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title">
+  <title id="title">Ilustrasi alat seduh kopi</title>
+  <rect width="320" height="320" rx="28" fill="#ece7df"/>
+  <path d="M93 112h134l-18 126H111L93 112Z" fill="#f7f5ef" stroke="#6b513d" stroke-width="8"/>
+  <path d="M118 239h84l-8 38h-68l-8-38Z" fill="#b87942"/>
+  <path d="M128 112 160 55l32 57" fill="#d7a66f" stroke="#6b513d" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M143 142h34M137 164h46M131 186h58" stroke="#9b7a59" stroke-width="5"/>
+  <path d="M100 279h120" stroke="#d2c3ad" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Security Labs{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">KOPILAB ACADEMY</p><h1>Belajar keamanan web, satu lab tiap sesi.</h1><p class="muted">Latihan lokal yang terstruktur: pahami bug, temukan dampaknya, lalu pelajari perbaikannya.</p></section>
+<section class="progress-panel"><div class="section-heading"><div><p class="eyebrow">PROGRES BELAJAR</p><h2>{{ solved_count }} dari {{ labs|length }} lab selesai</h2></div><strong>{{ progress|round|int }}%</strong></div><div class="progress-track"><span style="width: {{ progress }}%"></span></div>
+<form class="flag-form" method="post"><label for="flag-input">Sudah menemukan flag?</label><input id="flag-input" name="flag" placeholder="FLAG{...}" required><button class="button button-primary">Kirim flag</button></form></section>
+<div class="lab-toolbar"><label>Filter kategori <select id="lab-filter"><option value="all">Semua kategori</option>{% for category in labs|map(attribute='category_id')|unique %}<option value="{{ category }}">{{ category }} · OWASP Top 10 2021</option>{% endfor %}</select></label><span class="muted">{{ labs|length }} lab · lingkungan lokal</span></div>
+<div class="lab-grid" id="lab-grid">
+{% for lab in labs %}<article class="lab-card" data-category="{{ lab['category_id'] }}">
+  <div class="lab-card-top"><span class="category-pill">{{ lab['category_id'] }} · OWASP</span><span class="solved-badge {{ 'is-solved' if lab['solved'] else '' }}">{{ "Selesai" if lab['solved'] else "Belum dicoba" }}</span></div>
+  <h2><a href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">{{ lab['title'] }}</a></h2>
+  <p>{{ lab['concept'] }}</p>
+  <div class="lab-card-bottom"><span class="level-pill level-{{ lab['level']|lower }}">{{ lab['level'] }}</span><span class="muted">{{ lab['category'] }}</span><a class="text-button" href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">Buka lab →</a></div>
+</article>{% endfor %}
+</div>
+<section class="reset-panel"><div><p class="eyebrow">KONTROL DATA LATIHAN</p><h2>Mulai lagi kapan saja</h2><p class="muted">Progres disimpan di SQLite. Reset database mengembalikan semua data seed dan menghapus progres semua pelajar di database lokal ini.</p></div>
+<div class="reset-actions"><form method="post" action="{{ url_for('labs.reset_progress') }}"><button class="button button-outline">Reset progres saya</button></form>
+<form method="post" action="{{ url_for('labs.reset_database') }}" onsubmit="return confirm('Reset seluruh database dan progres lokal?')"><button class="button button-danger">Reset database lokal</button></form></div></section>
+{% endblock %}

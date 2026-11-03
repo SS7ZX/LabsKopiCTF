@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order['id'] }}{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">PESANAN TERSIMPAN</p><h1>Order #{{ order['id'] }}</h1></section>
+<article class="order-card"><h2>{{ order['item'] }}</h2><p>Jumlah: {{ order['qty'] }}</p><p>Total: <strong>Rp {{ "{:,.0f}".format(order['total']).replace(",", ".") }}</strong></p><p>Catatan: {{ order['note'] }}</p>
+{% if order['note'].startswith('FLAG{') %}<p class="flag">{{ order['note'] }}</p>{% endif %}</article>
+<a class="button button-outline" href="{{ url_for('account.orders') }}">Lihat riwayat pesanan</a>
+{% endblock %}

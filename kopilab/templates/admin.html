@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}<section class="page-heading"><p class="eyebrow">KONTROL TOKO</p><h1>Panel admin</h1><p class="flag">{{ flag }}</p></section>
+<div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Username</th><th>Password</th><th>Role</th></tr></thead><tbody>{% for user in users %}<tr><td>{{ user['id'] }}</td><td>{{ user['username'] }}</td><td>{{ user['password'] }}</td><td>{{ user['role'] }}</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Pesanan berhasil{% endblock %}
+{% block content %}
+<section class="empty-state"><p class="eyebrow">PESANAN DITERIMA</p><h1>Terima kasih sudah berbelanja.</h1><p>Order #{{ order_id }} berhasil dibuat.</p><p>Total pembayaran: <strong>Rp {{ "{:,.0f}".format(total).replace(",", ".") }}</strong></p>
+{% if flag %}<p class="flag">{{ flag }}</p>{% endif %}
+<a class="button button-primary" href="{{ url_for('account.orders') }}">Lihat riwayat pesanan</a></section>
+{% endblock %}

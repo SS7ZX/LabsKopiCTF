@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Riwayat pesanan{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">AKUN SAYA</p><h1>Riwayat pesanan</h1></section>
+{% for order in orders %}<a class="history-row" href="{{ url_for('shop.order', oid=order['id']) }}"><span><strong>Order #{{ order['id'] }}</strong><small>{{ order['item'] }} × {{ order['qty'] }}</small></span><strong>Rp {{ "{:,.0f}".format(order['total']).replace(",", ".") }}</strong></a>{% else %}<p class="empty-state">Belum ada pesanan.</p>{% endfor %}
+{% endblock %}

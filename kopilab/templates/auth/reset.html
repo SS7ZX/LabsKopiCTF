@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Reset password{% endblock %}
+{% block content %}<section class="auth-card"><p class="eyebrow">PEMULIHAN AKUN</p><h1>Reset password</h1>
+{% if message %}<p class="{{ 'flag' if success else 'notice' }}">{{ message }}</p>{% endif %}
+{% if secure_token %}<p class="notice">Token demo lokal (tersimpan di database, sekali pakai): <code>{{ secure_token }}</code></p>{% endif %}
+<form method="post" class="stack-form"><input type="hidden" name="step" value="request"><label>Username<input name="user" required></label><button class="button button-outline">Minta token</button></form>
+<hr><form method="post" class="stack-form"><label>Username<input name="user" required></label><label>Token<input name="token" required></label><label>Password baru<input name="password" required></label><button class="button button-primary">Ubah password</button></form></section>{% endblock %}

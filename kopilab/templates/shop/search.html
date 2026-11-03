@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Hasil pencarian{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">PENCARIAN</p><h1>Hasil untuk: {{ query|safe }}</h1><p class="muted">{{ products|length }} hasil ditemukan</p></section>
+{% if error %}<div class="notice notice-error"><strong>Pencarian gagal</strong><pre>{{ error }}</pre><details><summary>Query yang dijalankan</summary><pre>{{ sql }}</pre></details></div>{% endif %}
+<div class="product-grid">
+  {% for product in products %}
+    <article class="product-card">
+      <a class="product-image" href="{{ url_for('shop.product', pid=product['id']) }}"><img src="{{ url_for('static', filename='img/' + image_for(product['id'])) }}" alt="{{ product['name'] }}"></a>
+      <div class="product-info"><p class="rating">★★★★★</p><h3><a href="{{ url_for('shop.product', pid=product['id']) }}">{{ product['name'] }}</a></h3><p>{{ product['description'] }}</p><strong>Rp {{ "{:,.0f}".format(product['price']).replace(",", ".") }}</strong></div>
+    </article>
+  {% else %}
+    {% if not error %}<p class="empty-state">Belum ada produk yang cocok. Coba kata kunci lain.</p>{% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

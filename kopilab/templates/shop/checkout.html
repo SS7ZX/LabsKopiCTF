@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">SATU LANGKAH LAGI</p><h1>Checkout</h1><p>Periksa ringkasan pesanan sebelum konfirmasi.</p></section>
+<div class="checkout-summary">{% for item in items %}<div><span>{{ item['name'] }} × {{ item['quantity'] }}</span><strong>Rp {{ "{:,.0f}".format(item['subtotal']).replace(",", ".") }}</strong></div>{% endfor %}
+<div class="checkout-total"><span>Total</span><strong>Rp {{ "{:,.0f}".format(total).replace(",", ".") }}</strong></div>
+<form method="post" action="{{ url_for('shop.cart_checkout') }}"><button class="button button-primary button-wide">Konfirmasi pesanan</button></form></div>
+{% endblock %}

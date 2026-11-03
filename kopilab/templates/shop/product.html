@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ product['name'] }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{{ url_for('shop.index') }}">Belanja</a><span>/</span><span>{{ product['name'] }}</span></nav>
+<section class="product-detail">
+  <div class="detail-image"><span class="product-tag">{{ product['category'] }}</span><img src="{{ url_for('static', filename='img/' + product['image']) }}" alt="{{ product['name'] }}"></div>
+  <div class="detail-copy">
+    <p class="eyebrow">KOPILAB PILIHAN</p><h1>{{ product['name'] }}</h1><p class="rating">★★★★★ <span>{{ reviews|length }} ulasan</span></p>
+    <p class="detail-description">{{ product['description'] }}</p>
+    <p class="detail-price">Rp {{ "{:,.0f}".format(product['price']).replace(",", ".") }}</p>
+    <form method="post" action="{{ url_for('shop.cart') }}" class="buy-form">
+      <input type="hidden" name="product_id" value="{{ product['id'] }}"><input type="hidden" name="action" value="add">
+      <label>Jumlah <input type="number" name="quantity" value="1" min="1" max="25"></label>
+      <button class="button button-primary" type="submit">Tambah ke keranjang</button>
+    </form>
+    <form method="post" action="{{ url_for('shop.wishlist_toggle', pid=product['id']) }}">
+      <button class="text-button" type="submit">{{ "Hapus dari wishlist" if in_wishlist else "♡ Simpan ke wishlist" }}</button>
+    </form>
+  </div>
+</section>
+<section class="review-section">
+  <div class="section-heading"><div><p class="eyebrow">CERITA PELANGGAN</p><h2>Ulasan pembeli</h2></div></div>
+  {% for review in reviews %}
+    <article class="review-card"><p class="rating">{{ "★" * review['rating'] }}{{ "☆" * (5 - review['rating']) }}</p><p>{{ review['body']|safe }}</p><p class="muted">Oleh {{ review['author']|safe }}</p></article>
+  {% else %}<p class="muted">Belum ada ulasan untuk produk ini.</p>{% endfor %}
+  <form class="review-form" method="post" action="{{ url_for('shop.review') }}">
+    <input type="hidden" name="pid" value="{{ product['id'] }}">
+    <label>Rating <select name="rating">{% for rating in range(5, 0, -1) %}<option value="{{ rating }}">{{ rating }} bintang</option>{% endfor %}</select></label>
+    <label>Ulasan <textarea name="body" rows="3" required placeholder="Bagaimana pengalamanmu?"></textarea></label>
+    <button class="button button-primary">Kirim ulasan</button>
+  </form>
+</section>
+{% endblock %}

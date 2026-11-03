@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Wishlist{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">DISIMPAN UNTUK NANTI</p><h1>Wishlist</h1></section>
+<div class="product-grid">{% for product in products %}
+  <article class="product-card"><a class="product-image" href="{{ url_for('shop.product', pid=product['id']) }}"><img src="{{ url_for('static', filename='img/' + product['image']) }}" alt="{{ product['name'] }}"></a>
+  <div class="product-info"><h3>{{ product['name'] }}</h3><strong>Rp {{ "{:,.0f}".format(product['price']).replace(",", ".") }}</strong>
+  <form method="post" action="{{ url_for('shop.wishlist_toggle', pid=product['id']) }}"><button class="text-button">Hapus dari wishlist</button></form></div></article>
+{% else %}<p class="empty-state">Belum ada produk di wishlist.</p>{% endfor %}</div>
+{% endblock %}

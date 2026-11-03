@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Masuk{% endblock %}
+{% block content %}<section class="auth-card"><p class="eyebrow">SELAMAT DATANG KEMBALI</p><h1>Masuk ke akun</h1>
+{% if error %}<div class="notice notice-error"><strong>Login gagal</strong><p>{{ error }}</p>{% if sql %}<details><summary>Query yang dijalankan</summary><pre>{{ sql }}</pre></details>{% endif %}</div>{% endif %}
+<form method="post"><label>Username<input name="username" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="button button-primary button-wide">Masuk</button></form>
+<p>Belum punya akun? <a href="{{ url_for('auth.register') }}">Daftar di sini</a></p><a href="{{ url_for('auth.reset') }}">Lupa password?</a></section>{% endblock %}

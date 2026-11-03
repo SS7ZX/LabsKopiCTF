@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Keranjang belanja{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">PESANANMU</p><h1>Keranjang belanja</h1></section>
+{% if items %}
+  <div class="cart-layout"><div class="cart-items">
+  {% for item in items %}
+    <article class="cart-item">
+      <img src="{{ url_for('static', filename='img/' + item['image']) }}" alt="">
+      <div class="cart-item-main"><h2><a href="{{ url_for('shop.product', pid=item['id']) }}">{{ item['name'] }}</a></h2><p>Rp {{ "{:,.0f}".format(item['price']).replace(",", ".") }}</p></div>
+      <form method="post" action="{{ url_for('shop.cart') }}" class="quantity-form">
+        <input type="hidden" name="product_id" value="{{ item['id'] }}"><input type="hidden" name="action" value="update">
+        <label class="sr-only" for="qty-{{ item['id'] }}">Jumlah {{ item['name'] }}</label><input id="qty-{{ item['id'] }}" type="number" name="quantity" min="1" max="25" value="{{ item['quantity'] }}">
+        <button class="button button-small">Perbarui</button>
+      </form>
+      <form method="post" action="{{ url_for('shop.cart') }}"><input type="hidden" name="action" value="remove"><input type="hidden" name="product_id" value="{{ item['id'] }}"><button class="text-button">Hapus</button></form>
+      <strong>Rp {{ "{:,.0f}".format(item['subtotal']).replace(",", ".") }}</strong>
+    </article>
+  {% endfor %}
+  </div><aside class="cart-summary"><h2>Ringkasan</h2><p><span>Subtotal</span><strong>Rp {{ "{:,.0f}".format(total).replace(",", ".") }}</strong></p><p class="muted">Ongkos kirim dihitung saat konfirmasi.</p>
+    <form method="post" action="{{ url_for('shop.cart_checkout') }}"><button class="button button-primary button-wide">Lanjut ke checkout</button></form>
+    <a class="text-button" href="{{ url_for('shop.index') }}">Lanjut belanja</a></aside></div>
+{% else %}
+  <div class="empty-state"><div class="empty-icon">☕</div><h2>Keranjangmu masih kosong</h2><p>Temukan kopi atau alat seduh favoritmu.</p><a class="button button-primary" href="{{ url_for('shop.index') }}">Mulai belanja</a></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Preview tautan{% endblock %}
+{% block content %}<section class="auth-card"><p class="eyebrow">TAUTAN PILIHAN</p><h1>Preview tautan</h1><form method="get" class="stack-form"><label>URL tujuan<input name="url" type="url" placeholder="http://127.0.0.1:5001/" value="{{ url or '' }}" required></label><button class="button button-primary">Tampilkan preview</button></form>
+{% if error %}<p class="notice notice-error">{{ error }}</p>{% endif %}
+{% if result is not none %}<h2>Hasil preview</h2><pre class="preview-result">{{ result }}</pre>{% endif %}</section>{% endblock %}
