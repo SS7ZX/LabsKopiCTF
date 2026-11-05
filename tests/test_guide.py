@@ -14,12 +14,16 @@ def test_guide_route_renders_all_system_sections(client):
         "toko",
         "belajar",
         "inspector",
+        "burp",
         "lokal",
         "labs",
         "tes",
     ):
         assert f'id="{section}"'.encode() in response.data
     assert b"127.0.0.1" in response.data
+    assert b"HTTP history" in response.data
+    assert b"Open browser" in response.data
+    assert b"Intercept is off" in response.data
 
 
 def test_guide_lists_every_lab_and_links_to_its_lesson(client):

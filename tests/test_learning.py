@@ -19,6 +19,9 @@ def test_every_lab_has_material_hints_solution_and_side_by_side_diff(client):
         assert b"Rentan" in response.data, lab_id
         assert b"Aman" in response.data, lab_id
         assert b"Langkah praktikum" in response.data, lab_id
+        assert b"Cara melihat request untuk lab ini" in response.data, lab_id
+        assert b"HTTP history" in response.data, lab_id
+        assert b"Request yang menjadi fokus di lab ini" in response.data, lab_id
         assert b"Kalau masih bingung" in response.data, lab_id
         assert b"Buka solusi lengkap" in response.data, lab_id
         assert b"Petunjuk 1" not in response.data, lab_id

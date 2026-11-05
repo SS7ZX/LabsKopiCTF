@@ -11,7 +11,7 @@
 <nav class="guide-toc" aria-label="Daftar isi panduan">
   <a href="#alur">Alur request</a><a href="#struktur">Struktur kode</a><a href="#database">Database</a>
   <a href="#mode">Dua mode</a><a href="#toko">Sistem toko</a><a href="#belajar">Sistem belajar</a>
-  <a href="#inspector">Inspector</a><a href="#labs">Semua lab</a><a href="#tes">Tes</a>
+  <a href="#inspector">Inspector</a><a href="#burp">Burp Suite</a><a href="#labs">Semua lab</a><a href="#tes">Tes</a>
 </nav>
 
 <section class="guide-section" id="alur">
@@ -127,15 +127,143 @@
   <p>Urutan melihat data juga penting: panel di respons halaman membaca catatan request sebelumnya, sebab catatan request yang sedang berlangsung baru disimpan saat respons akan dikirim.</p>
 </section>
 
+<section class="guide-section" id="burp">
+  <p class="eyebrow">8 · PANDUAN BURP SUITE UNTUK PEMULA</p>
+  <h2>Melihat request KopiLab lewat Burp Suite</h2>
+  <p>Bagian ini untuk orang yang baru pertama kali memakai Burp Suite. Kamu tidak perlu punya pengalaman keamanan web. Ikuti langkahnya dari atas ke bawah. Tujuannya adalah melihat komunikasi antara browser dan KopiLab yang berjalan di komputermu sendiri.</p>
+  <div class="guide-callout guide-warning"><strong>Batas latihan:</strong> gunakan Burp hanya pada KopiLab lokal yang kamu jalankan sendiri. Alamat latihan adalah <code>http://127.0.0.1:5000</code>. Jangan mengganti tujuan ke situs publik, komputer orang lain, jaringan sekolah atau kantor, maupun server lain. Jangan membuka port KopiLab ke internet.</div>
+
+  <h3>Sebelum mulai: kenali tiga jendela</h3>
+  <p>Saat latihan, biasanya ada tiga jendela yang perlu dibedakan. Yang penting adalah tahu jendela mana yang menjalankan aplikasi dan jendela mana yang menampilkan lalu lintas.</p>
+  <ol class="guide-steps">
+    <li><strong>Terminal.</strong> Jendela ini menjalankan KopiLab. Biarkan tetap terbuka selama latihan. Jika terminal ditutup atau server dihentikan, halaman KopiLab tidak bisa dibuka.</li>
+    <li><strong>Browser Burp.</strong> Ini browser yang dibuka dari Burp dengan tombol <strong>Open browser</strong>. Gunakan browser ini untuk membuka KopiLab agar permintaannya melewati Burp.</li>
+    <li><strong>Burp Suite.</strong> Ini jendela untuk melihat daftar request di <strong>HTTP history</strong>, dan bila diperlukan menahan request di <strong>Intercept</strong>.</li>
+  </ol>
+  <p><strong>Request</strong> adalah permintaan browser kepada aplikasi, misalnya “tampilkan katalog” atau “cari kata kopi”. <strong>Response</strong> adalah jawaban aplikasi, misalnya halaman katalog atau hasil pencarian. <strong>Proxy</strong> adalah perantara. Dalam latihan ini, browser Burp mengirim request melalui Burp, lalu Burp meneruskannya ke KopiLab.</p>
+  <p>Angka di alamat juga penting. <code>127.0.0.1</code> berarti komputer yang sedang kamu gunakan. <code>5000</code> adalah port KopiLab. Burp biasanya memiliki listener lokal di port <code>8080</code>. Port Burp dan port KopiLab punya tugas berbeda. Kamu tidak perlu mengubah keduanya untuk cara yang dijelaskan di sini.</p>
+
+  <h3>Langkah 1: jalankan KopiLab</h3>
+  <p>Kalau KopiLab belum pernah dijalankan di komputer ini, siapkan dependensinya dahulu. Buka PowerShell atau Command Prompt di Windows, lalu ketik perintah berikut satu demi satu. Tekan Enter setelah setiap baris.</p>
+  <pre><code>cd C:\kopilab
+py -3 -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt</code></pre>
+  <ul class="guide-list">
+    <li><code>cd C:\kopilab</code> berpindah ke folder proyek. Jika folder proyekmu berada di lokasi lain, ganti alamat folder ini dengan lokasi yang benar.</li>
+    <li><code>py -3 -m venv .venv</code> membuat lingkungan Python proyek. Langkah ini biasanya hanya perlu dilakukan satu kali untuk setiap salinan proyek.</li>
+    <li><code>.venv\Scripts\activate</code> mengaktifkan lingkungan tersebut di terminal yang sedang dipakai.</li>
+    <li><code>python -m pip install -r requirements.txt</code> memasang paket yang diperlukan KopiLab. Komputer perlu akses internet saat paket belum tersedia dan perlu diunduh.</li>
+  </ul>
+  <p>Untuk penggunaan berikutnya, buka terminal baru dan jalankan perintah berikut. Jangan jalankan setup pembuatan <code>.venv</code> berulang kali.</p>
+  <pre><code>cd C:\kopilab
+.venv\Scripts\activate
+python run.py</code></pre>
+  <p>Biarkan terminal berjalan. Tunggu sampai muncul alamat KopiLab, yaitu <code>http://127.0.0.1:5000</code>. Buka alamat itu di browser biasa untuk memastikan aplikasi dapat dimuat. Setelah berhasil, kamu boleh menutup tab browser biasa tersebut. Jangan tutup terminalnya.</p>
+  <div class="guide-callout"><strong>Tanda berhasil:</strong> terminal tidak kembali ke prompt dan menampilkan bahwa server berjalan di alamat lokal. Jika terminal menampilkan traceback atau pesan error, berhenti dulu dan periksa pesan tersebut. Burp tidak dapat memperbaiki KopiLab yang belum berhasil dijalankan.</div>
+
+  <h3>Langkah 2: buka Burp dan browser yang benar</h3>
+  <ol class="guide-steps">
+    <li>Buka aplikasi <strong>Burp Suite</strong> dari menu Start.</li>
+    <li>Jika muncul pilihan cara memulai proyek, pilih pilihan sementara atau default, lalu lanjutkan sampai jendela utama Burp terbuka. Nama tombol bisa sedikit berbeda antarversi.</li>
+    <li>Pilih tab <strong>Proxy</strong>.</li>
+    <li>Cari dan klik <strong>Open browser</strong>. Burp akan membuka browser khusus yang sudah disiapkan untuk terhubung melalui proxy lokal Burp.</li>
+    <li>Tunggu browser baru terbuka. Jangan gunakan browser biasa untuk langkah ini.</li>
+    <li>Klik bilah alamat browser Burp, ketik <code>http://127.0.0.1:5000</code>, lalu tekan Enter.</li>
+    <li>Pastikan halaman KopiLab tampil. Alamat harus memakai <code>http://</code>, bukan <code>https://</code>.</li>
+  </ol>
+  <p>Untuk KopiLab lokal, sertifikat CA Burp tidak perlu dipasang. Jangan mengubah alamat bind aplikasi menjadi <code>0.0.0.0</code>, jangan meneruskan port melalui router, dan jangan mengubah pengaturan agar komputer lain dapat mengakses server.</p>
+
+  <h3>Langkah 3: lihat request pertama di HTTP history</h3>
+  <p>Mulailah dengan melihat riwayat, bukan menahan request. Pastikan <strong>Intercept is off</strong>. Saat Intercept mati, browser bisa menggunakan aplikasi seperti biasa dan Burp tetap dapat mencatat request.</p>
+  <ol class="guide-steps">
+    <li>Di browser Burp, tekan <code>Ctrl+R</code> untuk memuat ulang halaman KopiLab.</li>
+    <li>Klik tautan <strong>Labs</strong> di navigasi KopiLab. Tunggu sampai halaman lab terbuka.</li>
+    <li>Kembali ke jendela Burp Suite. Buka <strong>Proxy</strong>, lalu <strong>HTTP history</strong>.</li>
+    <li>Lihat daftar yang muncul. Cari request dengan host <code>127.0.0.1</code> dan port <code>5000</code>. Baris paling baru bisa berada di atas atau di bawah, tergantung pengurutan di versi Burp yang kamu gunakan.</li>
+    <li>Klik satu baris request. Panel detail menampilkan isi request dan response. Jika panelnya kecil atau tidak tampak, coba pilih baris lain atau perbesar jendela Burp.</li>
+    <li>Kembali ke browser Burp, klik halaman lain, lalu lihat HTTP history lagi. Kamu akan melihat request tambahan yang dihasilkan oleh navigasi tersebut.</li>
+  </ol>
+  <p>Nama atau posisi panel Burp bisa berubah antarversi. Yang perlu dicari adalah tab <strong>Proxy</strong>, daftar <strong>HTTP history</strong>, dan detail untuk baris yang dipilih. Jangan khawatir jika tampilannya tidak persis sama dengan gambar atau panduan dari versi lain.</p>
+
+  <h3>Langkah 4: pahami isi satu baris request</h3>
+  <p>Pilih request halaman awal KopiLab atau halaman Labs yang baru kamu buka. Amati bagian-bagian ini tanpa mengubahnya:</p>
+  <ul class="guide-list">
+    <li><strong>Method.</strong> Jenis permintaan. <code>GET</code> umumnya dipakai untuk meminta halaman atau data. <code>POST</code> umumnya dipakai saat browser mengirim isi form.</li>
+    <li><strong>URL atau path.</strong> Alamat yang diminta. Misalnya <code>/</code> berarti halaman depan, sedangkan <code>/labs</code> berarti katalog lab.</li>
+    <li><strong>Headers.</strong> Informasi tambahan tentang request atau response, seperti jenis konten yang diterima browser. Header <code>Cookie</code> dapat berisi pengenal sesi, jadi jangan menyalin atau membagikannya.</li>
+    <li><strong>Parameters.</strong> Nilai yang dikirim bersama request. Nilai dapat berasal dari alamat halaman atau dari form yang kamu isi. Request untuk halaman biasa mungkin tidak memiliki parameter.</li>
+    <li><strong>Status response.</strong> Kode yang menunjukkan hasil pemrosesan. Contohnya, <code>200</code> biasanya menandakan aplikasi mengembalikan response, dan <code>302</code> biasanya menunjukkan browser diminta pindah ke alamat lain.</li>
+    <li><strong>Response body.</strong> Isi jawaban aplikasi. Untuk halaman toko, isinya sering berupa HTML yang kemudian ditampilkan browser.</li>
+  </ul>
+  <div class="guide-callout"><strong>Latihan pengamatan pertama:</strong> pilih satu request <code>GET</code> ke <code>/labs</code>. Catat method dan path-nya. Lalu klik satu lab di browser, pilih request baru yang muncul, dan bandingkan path-nya. Untuk latihan pertama ini, cukup amati. Tidak perlu mengubah data atau mengirim request ke alamat lain.</div>
+
+  <h3>Langkah 5: amati request dari form pencarian</h3>
+  <p>Form pencarian adalah contoh sederhana untuk melihat perbedaan antara membuka halaman dan mengirim data. Gunakan hanya pencarian katalog KopiLab.</p>
+  <ol class="guide-steps">
+    <li>Pastikan <strong>Intercept is off</strong> agar halaman tidak tertahan.</li>
+    <li>Di browser Burp, gunakan kotak pencarian katalog KopiLab. Masukkan kata biasa, misalnya <code>kopi</code>, lalu tekan tombol Cari.</li>
+    <li>Kembali ke Burp dan buka <strong>Proxy &gt; HTTP history</strong>.</li>
+    <li>Pilih request terbaru yang menuju ke host <code>127.0.0.1:5000</code>.</li>
+    <li>Perhatikan method, path, dan bagian parameter. Kata yang kamu cari mungkin terlihat sebagai parameter di URL atau di isi request, bergantung pada cara form mengirim data.</li>
+    <li>Kembali ke browser dan lihat hasil pencarian. Hubungkan tindakan di browser dengan request yang kamu pilih dan response yang diterima.</li>
+  </ol>
+  <p>Jangan mencoba nilai yang menargetkan layanan lain. Tujuan latihan ini adalah mengenali bagaimana input dari form tampak di request milik KopiLab lokal.</p>
+
+  <h3>Langkah 6: gunakan Intercept bila instruksi lab memintanya</h3>
+  <p>HTTP history hanya mencatat lalu lintas yang sudah lewat. <strong>Intercept</strong> berbeda: fitur ini menahan request sementara supaya kamu dapat melihatnya sebelum diteruskan ke KopiLab. Langkah ini opsional. Jika kamu hanya ingin belajar melihat request, HTTP history sudah cukup.</p>
+  <ol class="guide-steps">
+    <li>Di Burp, buka <strong>Proxy &gt; Intercept</strong>.</li>
+    <li>Periksa tombol statusnya. Jika tertulis <strong>Intercept is off</strong>, klik satu kali untuk menyalakannya. Status harus berubah menjadi <strong>Intercept is on</strong>.</li>
+    <li>Kembali ke browser Burp dan lakukan satu aksi sederhana di KopiLab, misalnya memuat ulang halaman awal.</li>
+    <li>Kembali ke Burp. Jika request cocok dengan aturan intersepsi, Burp akan menampilkannya dan browser akan menunggu. Menunggu pada tahap ini adalah hal yang normal.</li>
+    <li>Klik <strong>Forward</strong> untuk meneruskan request ke KopiLab. Jika ada lebih dari satu request tertahan, lanjutkan satu per satu sampai browser selesai memuat halaman.</li>
+    <li>Gunakan <strong>Drop</strong> hanya jika ingin membatalkan request latihan yang sedang ditahan. Jika request di-drop, aplikasi tidak menerima request itu dan halaman mungkin tidak terbuka dengan normal.</li>
+    <li>Setelah selesai, klik status Intercept agar kembali menjadi <strong>Intercept is off</strong>. Periksa statusnya sebelum melanjutkan memakai aplikasi.</li>
+  </ol>
+  <div class="guide-callout guide-warning"><strong>Browser terlihat macet?</strong> Jangan langsung menutup aplikasi. Kembali ke tab Intercept. Jika ada request yang menunggu, klik <strong>Forward</strong> untuk meneruskannya. Setelah halaman pulih, matikan Intercept. Request yang tertahan memang membuat browser menunggu.</div>
+
+  <h3>HTTP history dan Intercept, bedanya apa?</h3>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Fitur</th><th>Fungsinya</th><th>Kapan dipakai</th></tr></thead><tbody>
+    <tr><td><strong>HTTP history</strong></td><td>Menampilkan catatan request dan response yang sudah melewati Burp.</td><td>Untuk melihat apa yang dikirim browser dan apa yang dijawab KopiLab. Ini pilihan terbaik untuk mulai belajar.</td></tr>
+    <tr><td><strong>Intercept</strong></td><td>Menahan request sementara sebelum diteruskan ke aplikasi.</td><td>Hanya saat instruksi latihan meminta kamu mengamati atau mengendalikan request sebelum diteruskan.</td></tr>
+  </tbody></table></div>
+
+  <h3>Kalau ingin memakai browser biasa</h3>
+  <p>Cara paling mudah adalah tetap memakai tombol <strong>Open browser</strong> di Burp. Browser biasa tidak otomatis mengirim lalu lintas melalui Burp. Browser tersebut perlu dikonfigurasi agar memakai proxy lokal Burp, dan pengaturannya berbeda menurut browser maupun sistem operasi.</p>
+  <p>Jika kamu sudah memahami pengaturan proxy, periksa listener Burp pada pengaturan <strong>Proxy</strong>. Listener standar umumnya berada di <code>127.0.0.1:8080</code>, tetapi gunakan nilai yang benar-benar ditampilkan di Burp. Pastikan browser tidak mengecualikan alamat loopback <code>127.0.0.1</code> dari proxy. Jangan mengubah listener supaya dapat menerima koneksi dari komputer lain. Jika tidak yakin, tutup browser biasa dan gunakan <strong>Open browser</strong>.</p>
+
+  <h3>Pemecahan masalah untuk pemula</h3>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Yang terlihat</th><th>Yang perlu dilakukan</th></tr></thead><tbody>
+    <tr><td>Halaman <code>127.0.0.1:5000</code> tidak terbuka.</td><td>Lihat terminal. Pastikan kamu sudah menjalankan <code>python run.py</code>, terminal masih terbuka, dan alamat lokal tercetak tanpa error. Jika server berhenti, jalankan lagi.</td></tr>
+    <tr><td>Burp terbuka tetapi browser Burp tidak muncul.</td><td>Kembali ke tab <strong>Proxy</strong>, cari <strong>Open browser</strong>, dan klik lagi. Jika Burp masih memulai, tunggu sampai jendela utamanya siap.</td></tr>
+    <tr><td>KopiLab terbuka di browser tetapi HTTP history kosong.</td><td>Pastikan halaman dibuka melalui browser yang diluncurkan dengan <strong>Open browser</strong>, bukan browser biasa. Muat ulang halaman, buka <strong>Proxy &gt; HTTP history</strong>, lalu periksa filter yang mungkin menyembunyikan request. Periksa juga pengaturan proxy dan aturan pengecualian localhost atau <code>127.0.0.1</code>. Jika alamat lokal dikecualikan dari proxy, browser dapat menghubungi KopiLab tanpa melewati Burp.</td></tr>
+    <tr><td>Browser terus menunggu setelah klik atau reload.</td><td>Buka <strong>Proxy &gt; Intercept</strong>. Jika statusnya <strong>Intercept is on</strong> dan ada request menunggu, klik <strong>Forward</strong>. Setelah itu ubah status kembali menjadi <strong>Intercept is off</strong>.</td></tr>
+    <tr><td>Burp mencatat banyak request.</td><td>Halaman web dapat meminta beberapa berkas seperti CSS dan JavaScript selain HTML. Pilih request terbaru dengan host <code>127.0.0.1</code> dan port <code>5000</code>. Untuk permulaan, fokus pada request halaman yang baru kamu buka.</td></tr>
+    <tr><td>Ada pesan bahwa port sudah digunakan.</td><td>Port mungkin dipakai aplikasi lain. Jangan menutup proses yang tidak dikenal. Untuk Burp, periksa port listener di pengaturan Proxy. Untuk KopiLab, baca pesan terminal dan hentikan hanya server KopiLab yang kamu jalankan sendiri.</td></tr>
+    <tr><td>Browser menampilkan error koneksi proxy.</td><td>Pastikan Burp masih berjalan dan listener proxy lokal aktif. Cara paling sederhana adalah tutup browser yang bermasalah, lalu klik <strong>Open browser</strong> lagi dari Burp.</td></tr>
+    <tr><td>Alamat dengan <code>localhost</code> membingungkan.</td><td>Gunakan alamat persis <code>http://127.0.0.1:5000</code>. Pastikan tidak ada salah ketik dan gunakan <code>http</code>, bukan <code>https</code>.</td></tr>
+  </tbody></table></div>
+
+  <h3>Akhiri latihan dengan rapi</h3>
+  <ol class="guide-steps">
+    <li>Pastikan status Intercept kembali menjadi <strong>Intercept is off</strong>.</li>
+    <li>Tutup browser Burp jika sudah selesai.</li>
+    <li>Kembali ke terminal yang menjalankan KopiLab, lalu tekan <code>Ctrl+C</code> untuk menghentikan server.</li>
+    <li>Tutup Burp Suite jika tidak akan digunakan lagi.</li>
+  </ol>
+  <p>Kamu tidak perlu menghapus database untuk mengakhiri sesi. Burp juga tidak perlu dibiarkan aktif setelah latihan. Jika hanya ingin melihat ringkasan request terakhir saat menggunakan KopiLab, kamu bisa memakai <a href="#inspector">Request Inspector bawaan</a>.</p>
+</section>
+
 <section class="guide-section" id="lokal">
-  <p class="eyebrow">8 · BATAS LAB</p><h2>Kenapa simulator harus tetap lokal?</h2>
+  <p class="eyebrow">9 · BATAS LAB</p><h2>Kenapa simulator harus tetap lokal?</h2>
   <p>CSRF simulator berjalan di port 9000 dan service SSRF latihan di port 5001. Keduanya bind hanya ke `127.0.0.1`; SSRF dibatasi ke service internal KopiLab. Upload disimpan di folder proyek dan tidak pernah dijalankan. Simulator tidak membaca cookie, tidak menebak password, dan tidak menghubungi situs pihak lain.</p>
   <p>Untuk mencoba simulator CSRF, buka terminal kedua lalu jalankan <code>python run_attacker.py</code>; halaman tetap hanya ditujukan ke `127.0.0.1:5000`. Service SSRF port 5001 mulai bersama aplikasi utama dari `run.py`.</p>
   <div class="guide-callout guide-warning"><strong>Aturan kelas:</strong> lakukan request hanya ke KopiLab di komputer sendiri. Jangan ganti tujuan ke alamat internet, komputer teman, alamat kantor/kampus, atau server publik. Hentikan server dengan Ctrl+C setelah kelas.</div>
 </section>
 
 <section class="guide-section" id="labs">
-  <p class="eyebrow">9 · PETA SELURUH LAB</p><h2>20 latihan yang bisa dipelajari</h2>
+  <p class="eyebrow">10 · PETA SELURUH LAB</p><h2>20 latihan yang bisa dipelajari</h2>
   <p>Klik judul untuk membuka langkah praktikum, hints, dan solusi lengkap. Kategori A01/A03 dan seterusnya mengacu pada kelompok OWASP Top 10 2021.</p>
   <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Lab</th><th>Yang dipelajari</th><th>OWASP</th><th>Level</th><th>Target lokal</th></tr></thead><tbody>
   {% for lab in labs %}<tr><td><a href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">{{ lab['title'] }}</a></td><td>{{ lab['category'] }}</td><td>{{ lab['category_id'] }}</td><td>{{ lab['level'] }}</td><td><code>{{ lab['endpoint'] }}</code></td></tr>{% endfor %}
@@ -143,7 +271,7 @@
 </section>
 
 <section class="guide-section" id="tes">
-  <p class="eyebrow">10 · CARA MEMASTIKAN SISTEM</p><h2>Apa yang diperiksa oleh tes otomatis?</h2>
+  <p class="eyebrow">11 · CARA MEMASTIKAN SISTEM</p><h2>Apa yang diperiksa oleh tes otomatis?</h2>
   <ul class="guide-list">
     <li>Tes mode Vulnerable memastikan perilaku lab lama dan tambahan masih bisa diamati pada data lokal.</li>
     <li>Tes Secure memastikan input serupa ditolak atau diproses dengan aturan lebih aman.</li>
