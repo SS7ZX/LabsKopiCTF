@@ -46,6 +46,7 @@ def init_db(app: Any, reset: bool = False) -> None:
             CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT, role TEXT, balance INTEGER);
             CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, name TEXT, price INTEGER, description TEXT, category TEXT NOT NULL DEFAULT 'Kopi', image TEXT NOT NULL DEFAULT 'coffee-bag.svg');
             CREATE TABLE IF NOT EXISTS orders(id INTEGER PRIMARY KEY, user_id INTEGER, item TEXT, qty INTEGER, total INTEGER, note TEXT);
+            CREATE TABLE IF NOT EXISTS final_boss_quotes(id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, product_id INTEGER NOT NULL, item TEXT NOT NULL, qty INTEGER NOT NULL, total INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);
             CREATE TABLE IF NOT EXISTS reviews(id INTEGER PRIMARY KEY, product_id INTEGER, author TEXT, body TEXT);
             CREATE TABLE IF NOT EXISTS secrets(name TEXT, value TEXT);
             CREATE TABLE IF NOT EXISTS wishlist(user_id INTEGER NOT NULL, product_id INTEGER NOT NULL, UNIQUE(user_id, product_id));

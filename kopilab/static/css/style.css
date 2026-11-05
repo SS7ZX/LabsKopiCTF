@@ -145,6 +145,7 @@ input, select, textarea { min-width: 0; padding: 10px 12px; border: 1px solid va
 .level-pill { background: #e9f5eb; color: #245c27; }
 .level-medium { background: #fff0cf; color: #69450e; }
 .level-hard { background: #fff0ed; color: #8e3424; }
+.level-super-sulit { background: #542f5e; color: #fff; }
 .lab-card-bottom { margin-top: 14px; }
 .lesson-heading { display: flex; justify-content: space-between; gap: 20px; align-items: start; margin-bottom: 22px; }
 .lesson-heading h1 { margin: 0; font: 500 34px/1.2 Georgia, serif; }
@@ -210,6 +211,13 @@ input, select, textarea { min-width: 0; padding: 10px 12px; border: 1px solid va
 .guide-section pre { overflow: auto; margin: 14px 0; padding: 14px; border-radius: 7px; background: #292722; color: #f8f2e9; }
 .guide-section pre code { color: inherit; }
 .guide-card-grid, .mode-explainer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin: 18px 0; }
+.guide-lab-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.guide-lab-grid .lesson-card { min-width: 0; margin: 0; }
+.guide-lab-grid summary { cursor: pointer; line-height: 1.55; }
+.guide-lab-grid summary code { overflow-wrap: anywhere; }
+.guide-lab-grid details[open] summary { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.guide-lab-grid p { font-size: 13px; }
+.guide-lab-grid a { font-size: 13px; font-weight: 700; }
 .guide-card-grid article, .mode-explainer article { padding: 17px; border: 1px solid var(--line); border-radius: 9px; background: #fcfaf6; }
 .guide-card-grid h3, .mode-explainer h3 { margin: 0 0 7px; font: 500 18px Georgia, serif; }
 .guide-card-grid p, .mode-explainer p { margin: 0; color: var(--muted); font-size: 13px; }
@@ -261,7 +269,7 @@ input, select, textarea { min-width: 0; padding: 10px 12px; border: 1px solid va
   .cart-item > strong { grid-column: 3; grid-row: 2; }
   .site-footer { flex-direction: column; gap: 5px; padding: 20px 18px; }
   .guide-toc { top: 64px; }
-  .guide-card-grid, .mode-explainer { grid-template-columns: 1fr; }
+  .guide-card-grid, .mode-explainer, .guide-lab-grid { grid-template-columns: 1fr; }
   .lab-grid { grid-template-columns: 1fr; }
   .lab-toolbar { align-items: stretch; flex-direction: column; }
   .lesson-heading { flex-direction: column; }

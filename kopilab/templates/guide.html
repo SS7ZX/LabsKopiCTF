@@ -227,7 +227,112 @@ python run.py</code></pre>
   <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Fitur</th><th>Fungsinya</th><th>Kapan dipakai</th></tr></thead><tbody>
     <tr><td><strong>HTTP history</strong></td><td>Menampilkan catatan request dan response yang sudah melewati Burp.</td><td>Untuk melihat apa yang dikirim browser dan apa yang dijawab KopiLab. Ini pilihan terbaik untuk mulai belajar.</td></tr>
     <tr><td><strong>Intercept</strong></td><td>Menahan request sementara sebelum diteruskan ke aplikasi.</td><td>Hanya saat instruksi latihan meminta kamu mengamati atau mengendalikan request sebelum diteruskan.</td></tr>
+    <tr><td><strong>Repeater</strong></td><td>Mengirim ulang satu request yang dipilih, dengan perubahan yang kamu kendalikan.</td><td>Membuat baseline, mengubah satu nilai, lalu membandingkan response. Ini alat utama untuk latihan request manual.</td></tr>
+    <tr><td><strong>Decoder</strong></td><td>Membantu melihat representasi URL-encoded atau Base64 sebagai teks.</td><td>Untuk memahami encoding. Decode bukan decrypt dan tidak membuat data terenkripsi otomatis terbaca.</td></tr>
   </tbody></table></div>
+
+  <h3>Langkah 7: alur kerja Repeater yang terukur</h3>
+  <p>Repeater tidak menjalankan pengujian otomatis: setiap klik <strong>Send</strong> mengirim satu request. Untuk latihan, gunakan pola baseline → satu perubahan → response → pembanding Secure. Jangan mengubah beberapa hal sekaligus karena kamu tidak akan tahu perubahan mana yang menyebabkan hasil.</p>
+  <ol class="guide-steps">
+    <li>Selesaikan satu aksi normal pada browser Burp, lalu cari request yang tepat di <strong>Proxy &gt; HTTP history</strong>. Pastikan host <code>127.0.0.1</code>, port <code>5000</code>, method, dan path cocok dengan endpoint yang tertulis di halaman lab.</li>
+    <li>Klik kanan baris tersebut dan pilih <strong>Send to Repeater</strong>. Buka tab Repeater dan pastikan request masih ditujukan ke KopiLab lokal. Jika host atau port berbeda, jangan kirim.</li>
+    <li>Kirim request tanpa perubahan untuk memperoleh baseline Repeater. Catat status, header penting, dan body. Baseline memastikan request lengkap dan sesi bekerja sebelum input lab diuji.</li>
+    <li>Ubah hanya parameter atau field yang diminta materi. Pertahankan method, path, host, port, dan sesi. Jangan menambahkan header atau field yang tidak relevan.</li>
+    <li>Tekan <strong>Send</strong> sekali dan bandingkan response dengan baseline. Periksa status, redirect/Location, JSON atau HTML, serta header seperti <code>X-Lab-Flag</code>. Flag adalah penanda latihan, bukan bukti otorisasi pada sistem nyata.</li>
+    <li>Untuk menguji Secure, ubah mode lewat halaman KopiLab di browser Burp, lalu tangkap request baru. Mode disimpan dalam sesi browser; request lama di Repeater bisa membawa cookie lama. Gunakan request yang baru ditangkap agar perbandingan adil.</li>
+    <li>Ulangi perubahan yang sama di Secure. Catat apa yang ditolak atau diperlakukan sebagai data, lalu pastikan operasi yang sah tetap berjalan.</li>
+  </ol>
+  <div class="guide-callout guide-warning"><strong>Perhatian:</strong> Repeater mengulang POST persis seperti request lainnya. Checkout, transfer, reset password, ulasan, upload, perubahan profil, dan redeem dapat mengubah database setiap kali dikirim. Jangan spam tombol Send; batasi pada jumlah percobaan di halaman lab dan reset data latihan bila perlu.</div>
+
+  <h3>Kerangka analisis request dan response</h3>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Bagian</th><th>Pertanyaan analisis</th><th>Contoh yang diamati</th></tr></thead><tbody>
+    <tr><td>Request line</td><td>Method dan path apa yang dipanggil? Apakah sesuai endpoint lab?</td><td><code>GET /search?q=Gayo</code> atau <code>POST /login</code>.</td></tr>
+    <tr><td>Target dan sesi</td><td>Apakah Host/port tetap lokal? Apakah request memerlukan login?</td><td><code>127.0.0.1:5000</code>; cookie sesi hanya untuk browser sendiri.</td></tr>
+    <tr><td>Parameter/body</td><td>Nilai mana yang berasal dari klien dan mana yang seharusnya diputuskan server?</td><td><code>q</code>, <code>price</code>, <code>role</code>, <code>file</code>, atau <code>url</code> sesuai lab.</td></tr>
+    <tr><td>Content-Type</td><td>Bagaimana data dikodekan dan dikirim?</td><td>Query URL, <code>application/x-www-form-urlencoded</code>, JSON, atau <code>multipart/form-data</code>.</td></tr>
+    <tr><td>Status dan redirect</td><td>Apakah aplikasi sukses, menolak, atau meminta browser berpindah?</td><td><code>200</code>, <code>302</code> dengan <code>Location</code>, <code>400</code>, <code>403</code>, <code>404</code>, atau <code>429</code>.</td></tr>
+    <tr><td>Response body</td><td>Apakah nilai berubah, data terungkap, atau error aman dikembalikan?</td><td>HTML, JSON, pesan validasi, atau isi file latihan.</td></tr>
+    <tr><td>Response headers</td><td>Apakah ada sinyal latihan? Apakah ada informasi sensitif yang harus dirahasiakan?</td><td><code>X-Lab-Flag</code> hanya di lingkungan latihan; jangan bagikan <code>Set-Cookie</code>.</td></tr>
+    <tr><td>State</td><td>Apakah request mengubah saldo, akun, order, ulasan, atau file?</td><td>Catat kondisi sebelum dan sesudah; kirim ulang POST hanya jika langkah lab memintanya.</td></tr>
+  </tbody></table></div>
+  <p>Ketika parameter terlihat seperti <code>%27</code> atau <code>%20</code>, itu bisa merupakan URL encoding untuk karakter di request. Bandingkan tampilan raw dan decoded pada Burp Inspector/Decoder, tetapi jangan mengubah encoding kecuali materi meminta. Jangan menghapus <code>Content-Length</code> atau boundary multipart secara manual; biarkan Burp menyesuaikan setelah edit.</p>
+
+  <h3>Deep dive: cara berpikir saat menguji satu request</h3>
+  <p>Tujuan Repeater bukan sekadar melihat “berhasil” atau “gagal”. Gunakan urutan observasi → hipotesis → eksperimen terkontrol → bukti → pembanding Secure. Dengan pola ini, kamu bisa menjelaskan <em>kenapa</em> respons berubah dan field mana yang membuktikan dampaknya.</p>
+  <ol class="guide-steps">
+    <li><strong>Tulis pertanyaan yang sempit.</strong> Contoh: “Apakah server memeriksa pemilik invoice nested?” lebih baik daripada “Apakah API ini rentan?”. Tentukan field yang diperkirakan berubah dan hasil yang akan menyangkal hipotesis.</li>
+    <li><strong>Buat kontrol positif.</strong> Jalankan alur normal yang seharusnya berhasil, misalnya buka invoice milik sendiri atau minta quote sebelum confirm. Kalau kontrol normal gagal, jangan lanjut menafsirkan eksperimen; periksa login, method, content type, parameter wajib, dan state.</li>
+    <li><strong>Simpan baseline persis.</strong> Di Repeater, duplikasi tab/request sebelum mengedit. Catat mode, sesi (cukup label seperti “Budi-local”, bukan nilai cookie), urutan, status, header penting, dan field body yang relevan.</li>
+    <li><strong>Ubah satu variabel.</strong> Pertahankan method, path, host, port, akun, dan seluruh input lain. Ubah satu nilai yang sedang diuji; jika beberapa field berubah, hasilnya tidak menunjukkan mana penyebabnya.</li>
+    <li><strong>Kirim satu kali lalu baca seluruh respons.</strong> Periksa status, redirect, header, dan body. Jangan berhenti pada `200`, `403`, atau pesan “success”; cari data atau perubahan state yang secara konkret menunjukkan dampak.</li>
+    <li><strong>Ulangi eksperimen kontrol.</strong> Kembalikan nilai baseline, lalu ubah hanya variabel tadi ke nilai pembanding lain yang sah di fixture. Ini membantu membedakan sebab-akibat dari state yang tertinggal.</li>
+    <li><strong>Uji Secure dengan state yang sebanding.</strong> Ubah mode melalui UI KopiLab, lalu tangkap request baru. Mode berada di sesi browser; request lama dapat membawa cookie sesi/mode sebelumnya. Untuk lab berantai, mulai ulang urutan dari langkah awal setelah pergantian mode.</li>
+    <li><strong>Tulis kesimpulan yang terukur.</strong> Sebutkan input yang berubah, hasil baseline dan eksperimen, bukti body/header/state, mode, serta batas fixture. Jangan menuliskan cookie atau token penuh.</li>
+  </ol>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Lapisan yang dibaca</th><th>Pertanyaan detail</th><th>Kesalahan tafsir yang perlu dihindari</th></tr></thead><tbody>
+    <tr><td>Request line</td><td>Apakah method, path, dan query sesuai aksi yang dilakukan? Apakah parameter berada di query string atau body?</td><td>Mengubah GET menjadi POST atau mengedit URL yang salah lalu menganggap respons berasal dari tes yang dimaksud.</td></tr>
+    <tr><td>Headers dan cookie</td><td>Apakah Content-Type sesuai format body? Apakah sesi login diperlukan? Apakah target tetap loopback?</td><td>Menghapus cookie sehingga request menjadi anonim, atau membagikan cookie/token dalam screenshot.</td></tr>
+    <tr><td>Body dan encoding</td><td>Apakah body form, JSON, atau multipart? Apakah nilai khusus di-encode sekali dengan benar?</td><td>Mengirim JSON dengan Content-Type form, melakukan double-encoding, atau menghapus boundary multipart.</td></tr>
+    <tr><td>Status/redirect</td><td>Apakah respons adalah hasil akhir, validasi, redirect login, atau konflik state? Apa isi Location?</td><td>Menganggap `200` sebagai bukti akses atau `302` sebagai bukti eksploit berhasil tanpa mengikuti hasil lokalnya.</td></tr>
+    <tr><td>Body/field</td><td>Field apa yang berubah? Apakah record asing atau nilai server benar-benar muncul?</td><td>Menyamakan pesan sukses generik dengan data leak atau perubahan bisnis nyata.</td></tr>
+    <tr><td>State</td><td>Apakah request pertama membuat challenge/quote/job yang diperlukan request berikutnya? Apakah object sudah dipakai?</td><td>Mengirim request tahap akhir lebih dulu, memakai sesi berbeda, atau membaca hasil setelah state terpakai.</td></tr>
+  </tbody></table></div>
+
+  <h3>Deep dive: empat pola analisis lab Super Sulit</h3>
+  <p>Lab Practitioner KopiLab memang dirancang sebagai rangkaian beberapa request. Jalankan manual dan berurutan pada Repeater. Seluruh nilai di bawah adalah fixture lokal, bukan format untuk layanan nyata.</p>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Lab dan pertanyaan</th><th>Baseline berurutan</th><th>Eksperimen satu variabel</th><th>Bukti dampak dan Secure</th></tr></thead><tbody>
+    <tr><td><strong>Tenant export:</strong> apakah pemilik tenant dicek saat create dan download?</td><td>Login Budi → `action=list` → create `tenant-campus` → download `export-tenant-campus`.</td><td>Pertahankan sesi; ubah hanya `tenant_id` ke `tenant-roastery`, lalu gunakan `exportId` yang dikembalikan pada download berikutnya.</td><td>Dampak baru terbukti jika body download menyebut tenant asing dan record fixture. Secure menolak foreign create dan tidak mengembalikan data foreign pada download.</td></tr>
+    <tr><td><strong>Checkout settlement:</strong> apakah nominal confirm terikat pada quote server?</td><td>`action=quote` → simpan `quoteId`/total → confirm total yang benar.</td><td>Minta quote baru; pertahankan ID dan ubah hanya `total` menjadi `1`. Jangan menguji replay bersamaan dengan mismatch.</td><td>Bandingkan `submittedTotal`, `serverTotal`, `underpaid`, `settled`, dan flag. Secure menolak mismatch; quote valid hanya dapat dikonsumsi sekali.</td></tr>
+    <tr><td><strong>Webhook replay:</strong> apakah event identik memberi efek dua kali?</td><td>Kirim satu event fixture valid; catat `creditCount` awal.</td><td>Kirim ulang request yang identik tepat sekali, tanpa mengubah body, header fixture, atau sesi.</td><td>Vulnerable menaikkan counter pada replay; Secure menjawab `409` dan counter tidak berubah. Signature marker tetap bukan kriptografi.</td></tr>
+    <tr><td><strong>Nested resolver:</strong> apakah objek anak diperiksa terpisah dari viewer root?</td><td>Login Budi; `viewer_id=2&invoice_id=2&alias=ledger`.</td><td>Pertahankan viewer dan alias; ubah hanya invoice menjadi `1`. Alias dapat diuji terpisah sebagai kontrol, bukan sebagai hak akses.</td><td>Periksa `reference` dan `total`, bukan status saja. Secure memberi penolakan tanpa field invoice asing.</td></tr>
+  </tbody></table></div>
+  <p><strong>Urutan eksperimen penting:</strong> simpan respons setiap tahap sebelum mengirim tahap berikutnya. Quote, job ekspor, challenge MFA, dan state workflow dapat hidup hanya pada sesi browser saat ini. Jika ganti mode, buat urutan baseline baru di sesi yang benar; jangan mencampur quote Vulnerable dengan request Secure.</p>
+
+  <h3>Deep dive: format request dan edit yang aman di Repeater</h3>
+  <ul class="guide-list">
+    <li><strong>Form URL-encoded.</strong> Umumnya terlihat sebagai <code>Content-Type: application/x-www-form-urlencoded</code> dan body seperti <code>action=quote&amp;total=125000</code>. Pisahkan parameter dengan <code>&amp;</code>; nama dan nilai dipisahkan oleh <code>=</code>. Jika mengubah nilai yang memiliki spasi atau karakter khusus, gunakan encoding yang sesuai satu kali.</li>
+    <li><strong>JSON.</strong> Pertahankan <code>Content-Type: application/json</code> dan sintaks JSON yang valid. Tanda kutip serta koma termasuk bagian format; perubahan kecil yang membuat JSON invalid dapat menghasilkan error parsing, bukan hasil uji keamanan.</li>
+    <li><strong>Query string.</strong> Nilai setelah <code>?</code> merupakan parameter URL. Saat ada parameter berulang, pertahankan urutan dan jumlahnya sesuai instruksi lab; jangan menyatukan dua nilai menjadi satu string.</li>
+    <li><strong>Multipart upload.</strong> Jangan menghapus header boundary atau mengedit separator multipart secara acak. Gunakan request upload yang ditangkap dari form dan ubah hanya bagian yang diminta materi.</li>
+    <li><strong>Panjang body.</strong> Burp biasanya memperbarui panjang konten saat request diedit. Jangan menebak atau mempertahankan panjang lama jika editor Burp dapat memperbaruinya.</li>
+    <li><strong>Redirect.</strong> `302` sering meminta browser berpindah; di Repeater baca `Location` terlebih dahulu. Bila perlu, kirim request tujuan sebagai langkah terpisah hanya jika path itu masih berada dalam KopiLab lokal.</li>
+    <li><strong>Tab dan label.</strong> Beri nama request/tab seperti `baseline-own`, `test-foreign-id`, `secure-control`. Label membantu membandingkan respons dan mencegah mengedit baseline tanpa sengaja.</li>
+  </ul>
+
+  <h3>Template catatan analisis</h3>
+  <div class="guide-callout"><strong>Salin format ini ke catatan pribadi tanpa rahasia:</strong><br>
+    Lab/mode: …<br>
+    Tujuan request dan sesi (label saja): …<br>
+    Baseline: method/path, parameter yang relevan, status, field response, state awal: …<br>
+    Hipotesis dan prediksi yang bisa dibantah: …<br>
+    Satu variabel yang diubah: …<br>
+    Hasil eksperimen: status, header indikator, field/body, state sesudah: …<br>
+    Pembanding Secure dengan state sepadan: …<br>
+    Kesimpulan dan batas simulasi: …<br>
+    <strong>Jangan masukkan:</strong> nilai Cookie/session, password, token reset, token JWT, atau data pribadi.
+  </div>
+
+  <h3>Playbook Burp untuk semua lab</h3>
+  <p>Setiap kartu merangkum request yang dicari, baseline yang aman, eksperimen lokal, indikator untuk dianalisis, dan hasil Secure yang diharapkan. Buka materi lab terkait sebelum mengirim request; detail input uji tetap mengikuti langkah dan hint lab.</p>
+  <div class="guide-lab-grid">
+    {% for lab in labs %}<details class="lesson-card">
+      <summary><strong>{{ lab['title'] }}</strong><br><code>{{ lab['burp_guide']['request'] }}</code></summary>
+      <p><strong>Baseline:</strong> {{ lab['burp_guide']['baseline'] }}</p>
+      <p><strong>Eksperimen Repeater:</strong> {{ lab['burp_guide']['exercise'] }}</p>
+      <p><strong>Analisis:</strong> {{ lab['burp_guide']['analysis'] }}</p>
+      <p><strong>Secure:</strong> {{ lab['burp_guide']['secure'] }}</p>
+      <a href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">Buka langkah dan materi lab →</a>
+    </details>{% endfor %}
+  </div>
+
+  <h3>Menjaga scope dan data tetap aman</h3>
+  <ul class="guide-list">
+    <li>Semua target latihan adalah aplikasi yang kamu jalankan sendiri: <code>http://127.0.0.1:5000</code>. SSRF hanya boleh memakai service simulasi <code>127.0.0.1:5001</code>; simulator CSRF hanya memakai <code>127.0.0.1:9000</code>.</li>
+    <li>Gunakan browser Burp yang disediakan dan amati host di setiap request. Jangan mengubah Host, port, atau tujuan URL ke internet, LAN, kantor/kampus, perangkat teman, atau server pihak ketiga.</li>
+    <li>Jangan jalankan Active Scan, Intruder, crawler, atau automation. Praktikum ini menggunakan Proxy dan Repeater secara manual pada endpoint lab yang tertera saja.</li>
+    <li>Cookie sesi, token reset, token JWT, password, dan data personal tidak boleh ditempelkan ke screenshot/laporan publik. Redaksi nilainya; cukup catat apakah header ada atau tidak.</li>
+    <li>Gunakan data latihan, catat kondisi awal, dan reset database proyek bila stateful lab mengubah seed. Jangan reset database ketika proses KopiLab atau tes otomatis lain sedang dipakai.</li>
+  </ul>
 
   <h3>Kalau ingin memakai browser biasa</h3>
   <p>Cara paling mudah adalah tetap memakai tombol <strong>Open browser</strong> di Burp. Browser biasa tidak otomatis mengirim lalu lintas melalui Burp. Browser tersebut perlu dikonfigurasi agar memakai proxy lokal Burp, dan pengaturannya berbeda menurut browser maupun sistem operasi.</p>
@@ -263,7 +368,7 @@ python run.py</code></pre>
 </section>
 
 <section class="guide-section" id="labs">
-  <p class="eyebrow">10 · PETA SELURUH LAB</p><h2>20 latihan yang bisa dipelajari</h2>
+  <p class="eyebrow">10 · PETA SELURUH LAB</p><h2>{{ labs|length }} latihan yang bisa dipelajari</h2>
   <p>Klik judul untuk membuka langkah praktikum, hints, dan solusi lengkap. Kategori A01/A03 dan seterusnya mengacu pada kelompok OWASP Top 10 2021.</p>
   <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Lab</th><th>Yang dipelajari</th><th>OWASP</th><th>Level</th><th>Target lokal</th></tr></thead><tbody>
   {% for lab in labs %}<tr><td><a href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">{{ lab['title'] }}</a></td><td>{{ lab['category'] }}</td><td>{{ lab['category_id'] }}</td><td>{{ lab['level'] }}</td><td><code>{{ lab['endpoint'] }}</code></td></tr>{% endfor %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Profil target Burp{% endblock %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{{ url_for('labs.labs') }}">Labs</a><span>/</span><span>Profil target Burp</span></nav>
+<section class="page-heading"><p class="eyebrow">TARGET LAB LOKAL · BURP REPEATER</p><h1>Form profil latihan</h1><p class="muted">Gunakan form ini hanya untuk praktikum Burp Repeater KopiLab. Form biasa hanya mengirim email profil.</p></section>
+<section class="lesson-card"><p><strong>Email saat ini:</strong> {{ user['email'] }}</p><p><strong>Role saat ini:</strong> {{ user['role'] }}</p><form method="post" action="{{ url_for('extra_labs.burp_profile') }}" class="stack-form"><label>Email<input name="email" type="email" value="{{ user['email'] }}" required></label><button class="button button-primary">Simpan profil latihan</button></form></section>
+<p class="muted">Endpoint ini hanya tersedia pada server KopiLab lokal. Kembali ke halaman lab untuk instruksi lengkap.</p>
+{% endblock %}

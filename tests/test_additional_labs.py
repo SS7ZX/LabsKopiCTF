@@ -100,6 +100,35 @@ def test_case_sensitive_filter_bypass_is_normalized_securely(client):
     assert not get_flag(secure)
 
 
+def test_burp_repeater_profile_lab_allows_role_tampering_only_in_vulnerable_mode(client):
+    client.post("/login", data={"username": "budi", "password": "budi123"})
+    assert client.get("/extra/burp-profile").status_code == 200
+    baseline = client.post(
+        "/extra/burp-profile", data={"email": "student@example.test"}
+    )
+    assert baseline.json == {"email": "student@example.test", "role": "user"}
+    assert not get_flag(baseline)
+
+    vulnerable = client.post(
+        "/extra/burp-profile",
+        data={"email": "student@example.test", "role": "admin"},
+    )
+    assert vulnerable.json["role"] == "admin"
+    assert get_flag(vulnerable) == "FLAG{burp_repeater_mass_assignment_local}"
+
+
+def test_burp_repeater_profile_lab_ignores_role_in_secure_mode(client):
+    client.post("/login", data={"username": "budi", "password": "budi123"})
+    set_mode(client, True)
+    secure = client.post(
+        "/extra/burp-profile",
+        data={"email": "student@example.test", "role": "admin"},
+    )
+    assert secure.status_code == 200
+    assert secure.json == {"email": "student@example.test", "role": "user"}
+    assert not get_flag(secure)
+
+
 def test_attacker_simulator_is_static_and_local_only():
     from attacker.server import PAGE
 

@@ -6,8 +6,9 @@ import secrets
 
 from flask import Blueprint, Response, current_app, flash, redirect, render_template, request, session, url_for
 
-from ..config import LABS, LAB_METADATA
+from ..config import BURP_LAB_GUIDES, LABS, LAB_METADATA
 from ..db import close_db, get_db, init_db
+from ..lab_system_guides import LAB_SYSTEM_GUIDES
 
 labs_bp = Blueprint("labs", __name__)
 
@@ -193,6 +194,9 @@ def lab_entries(solved: list[str]) -> list[dict[str, object]]:
                 "level": metadata["level"],
                 "cvss": metadata["cvss"],
                 "endpoint": metadata["endpoint"],
+                "burp_required": metadata.get("burp_required", False),
+                "burp_guide": BURP_LAB_GUIDES[lab_id],
+                "system_guide": LAB_SYSTEM_GUIDES[lab_id],
                 "solved": lab_id in solved,
                 "concept": lesson["concept"],
             }
@@ -231,6 +235,16 @@ def read_lesson(lab_id: str) -> dict[str, object]:
         "steps": [
             re.sub(r"^(?:[-*]\s+|\d+[.)]\s+)", "", line.strip())
             for line in sections.get("langkah latihan", "").splitlines()
+            if line.strip()
+        ],
+        "analysis": [
+            re.sub(r"^(?:[-*]\s+|\d+[.)]\s+)", "", line.strip())
+            for line in sections.get("analisis mendalam", "").splitlines()
+            if line.strip()
+        ],
+        "evidence": [
+            re.sub(r"^(?:[-*]\s+|\d+[.)]\s+)", "", line.strip())
+            for line in sections.get("bukti yang dicatat", "").splitlines()
             if line.strip()
         ],
         "stuck": sections.get("kalau masih bingung", "").strip(),

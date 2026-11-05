@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template
 
-from ..config import LABS, LAB_METADATA
+from ..config import BURP_LAB_GUIDES, LABS, LAB_METADATA
 
 guide_bp = Blueprint("guide", __name__)
 
@@ -18,6 +18,7 @@ def deep_dive():
             "category_id": LAB_METADATA[lab_id]["category_id"],
             "level": LAB_METADATA[lab_id]["level"],
             "endpoint": LAB_METADATA[lab_id]["endpoint"],
+            "burp_guide": BURP_LAB_GUIDES[lab_id],
         }
         for lab_id, title, category, _ in LABS
     ]

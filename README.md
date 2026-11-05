@@ -60,13 +60,17 @@ membaca cookie, atau mengirim data ke layanan lain. Hentikan dengan `Ctrl+C`.
 7. Lihat scoreboard SQLite atau unduh template laporan Markdown per lab.
 
 Untuk penjelasan arsitektur, database, alur request, seluruh route utama,
-mode, Inspector, dan peta 20 lab, buka menu **Deep Dive** di navigasi atau
-kunjungi <http://127.0.0.1:5000/guide>.
+mode, Inspector, dan peta 45 lab—termasuk empat challenge orisinal
+Super Sulit/Practitioner serta satu Hacker Class Final Boss—buka menu **Deep Dive** di navigasi atau kunjungi
+<http://127.0.0.1:5000/guide>.
 
 Setiap halaman lab menggunakan bahasa sederhana dan menyediakan tujuan,
 alamat tempat mencoba, langkah praktikum, tiga petunjuk bertahap, solusi,
 alasan bug terjadi, dan cara memperbaikinya. Membuka solusi bukan kegagalan:
 baca penjelasannya, lalu coba ulang sendiri di mode Secure.
+Panduan Deep Dive Burp menjelaskan Proxy, HTTP history, Intercept, Repeater,
+analisis request/response, pembandingan mode, batas scope lokal, dan playbook
+khusus untuk setiap lab.
 
 ### Istilah keamanan dengan bahasa sederhana
 
@@ -134,10 +138,33 @@ Semua lab lama dan flag dipertahankan. OWASP di bawah memakai Top 10 2021.
 | `open-redirect` | Redirect ke simulator loopback | A01 | Easy |
 | `rate-limit` | Batas percobaan login lemah | A07 | Medium |
 | `filter-bypass` | Filter case-sensitive | A03 | Hard |
+| `burp-repeater` | Wajib Burp Repeater: mass assignment profil lokal | A04 | Medium |
+| `cors-policy` | Kebijakan CORS dan trust boundary | A05 | Hard |
+| `clickjacking-headers` | Clickjacking dan frame policy | A05 | Hard |
+| `security-headers` | Security headers dan kebijakan browser | A05 | Hard |
+| `host-reset-link` | Host header pada preview tautan reset | A05 | Hard |
+| `cache-poison` | Cache poisoning simulasi per sesi | A05 | Hard |
+| `cache-deception` | Cache deception resource privat simulasi | A05 | Hard |
+| `websocket-auth` | Otorisasi handshake WebSocket simulasi | A01 | Hard |
+| `graphql-object` | Otorisasi objek API bergaya GraphQL | A01 | Hard |
+| `nosql-filter` | NoSQL filter injection simulasi | A03 | Hard |
+| `xxe-sandbox` | XXE dengan parser XML fixture lokal | A05 | Hard |
+| `ssti-toy` | Template injection renderer mainan | A03 | Hard |
+| `command-simulation` | Command injection konseptual tanpa shell | A03 | Hard |
+| `oauth-redirect` | Validasi redirect URI OAuth simulasi | A07 | Hard |
+| `oauth-state` | Validasi state OAuth simulasi | A07 | Hard |
+| `reset-host` | Origin tepercaya untuk preview password reset | A07 | Hard |
+| `mfa-workflow` | Urutan MFA pada autentikasi simulasi | A07 | Hard |
+| `workflow-order` | Validasi urutan workflow bisnis | A04 | Hard |
+| `info-disclosure` | Information disclosure diagnostic fixture | A05 | Hard |
+| `http-parameter-pollution` | Ambiguitas parameter duplikat | A04 | Hard |
 
 Lab baru memiliki materi, tiga hint, solusi, akar masalah, perbaikan, metadata,
-dan flag sendiri. Endpoint tambahan ada di `/extra/` dan tetap dibatasi pada
-data maupun tujuan latihan lokal.
+dan flag sendiri. Lab `burp-repeater` mewajibkan penggunaan Burp Repeater dan
+membatasi target ke `127.0.0.1:5000/extra/burp-profile`. Sembilan belas lab
+lanjutan baru memakai endpoint `/extra/academy/`; parser, cache, OAuth, WebSocket,
+dan command-injection di sana merupakan simulasi fixture—tanpa akses file host,
+koneksi eksternal, shared cache, provider OAuth, atau eksekusi shell.
 
 ## Menambah lab
 

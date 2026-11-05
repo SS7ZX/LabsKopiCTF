@@ -6,10 +6,10 @@ from kopilab.db import get_db
 def test_flag_submission_and_scoreboard_are_stored_in_sqlite(client, app):
     client.post("/labs", data={"flag": "FLAG{union_select_master}"})
     response = client.get("/labs")
-    assert b"1 dari 20 lab selesai" in response.data
+    assert b"1 dari 45 lab selesai" in response.data
     assert b"FLAG{union_select_master}" not in response.data
     scoreboard = client.get("/scoreboard")
-    assert b"1/20" in scoreboard.data
+    assert b"1/45" in scoreboard.data
     with app.app_context():
         count = get_db().execute("SELECT COUNT(*) FROM lab_solves").fetchone()[0]
         assert count == 1
@@ -18,7 +18,7 @@ def test_flag_submission_and_scoreboard_are_stored_in_sqlite(client, app):
 def test_reset_progress_removes_only_current_player_solves(client, app):
     client.post("/labs", data={"flag": "FLAG{union_select_master}"})
     client.post("/labs/reset-progress")
-    assert b"0 dari 20 lab selesai" in client.get("/labs").data
+    assert b"0 dari 45 lab selesai" in client.get("/labs").data
     with app.app_context():
         assert get_db().execute("SELECT COUNT(*) FROM lab_solves").fetchone()[0] == 0
 
@@ -51,7 +51,7 @@ def test_database_reset_restores_seed_data_and_clears_global_progress(client, ap
         get_db().commit()
     response = client.post("/labs/reset-database", follow_redirects=True)
     assert b"Database lokal dan seluruh progres berhasil direset." in response.data
-    assert b"0 dari 20 lab selesai" in response.data
+    assert b"0 dari 45 lab selesai" in response.data
     with app.app_context():
         assert get_db().execute("SELECT balance FROM users WHERE username='budi'").fetchone()[0] == 500000
         assert get_db().execute("SELECT COUNT(*) FROM lab_solves").fetchone()[0] == 0

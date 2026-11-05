@@ -10,7 +10,7 @@
   <div class="lab-card-top"><span class="category-pill">{{ lab['category_id'] }} · OWASP</span><span class="solved-badge {{ 'is-solved' if lab['solved'] else '' }}">{{ "Selesai" if lab['solved'] else "Belum dicoba" }}</span></div>
   <h2><a href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">{{ lab['title'] }}</a></h2>
   <p>{{ lab['concept'] }}</p>
-  <div class="lab-card-bottom"><span class="level-pill level-{{ lab['level']|lower }}">{{ lab['level'] }}</span><span class="muted">{{ lab['category'] }}</span><a class="text-button" href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">Buka lab →</a></div>
+  <div class="lab-card-bottom"><span class="level-pill level-{{ lab['level']|lower|replace(' ', '-') }}">{{ lab['level'] }}</span><span class="muted">{{ lab['category'] }}</span><a class="text-button" href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">Buka lab →</a></div>
 </article>{% endfor %}
 </div>
 <section class="reset-panel"><div><p class="eyebrow">KONTROL DATA LATIHAN</p><h2>Mulai lagi kapan saja</h2><p class="muted">Progres disimpan di SQLite. Reset database mengembalikan semua data seed dan menghapus progres semua pelajar di database lokal ini.</p></div>

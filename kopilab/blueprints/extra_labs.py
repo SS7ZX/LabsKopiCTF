@@ -5,9 +5,13 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from flask import Blueprint, current_app, jsonify, redirect, request, session
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session
 
+from .. import require_login
+from ..config import ACADEMY_LAB_IDS
 from ..db import get_db
+from ..vulns.mass_assign import update_profile
+from ..vulns.academy_labs import run_academy_lab, run_final_boss_lab
 from ..vulns.blind_sqli import evaluate_condition
 from ..vulns.filter_bypass import blocked_username
 from ..vulns.jwt_lab import decode_token, encode_token
@@ -17,6 +21,72 @@ from ..vulns.rate_limit import record_login_attempt
 from ..vulns.upload import upload_allowed
 
 extra_labs_bp = Blueprint("extra_labs", __name__, url_prefix="/extra")
+
+
+@extra_labs_bp.route("/academy/<lab_id>", methods=["GET", "POST"])
+def academy_lab(lab_id: str):
+    """Run a bounded advanced lab using only fixed local training fixtures."""
+    if lab_id not in ACADEMY_LAB_IDS:
+        return jsonify(error="Lab tidak ditemukan."), 404
+
+    if lab_id == "final-boss-ledger-chain":
+        outcome = run_final_boss_lab(
+            request.values,
+            session,
+            session.get("uid"),
+            secure=session.get("secure_mode", False),
+            connection=get_db(),
+        )
+        outcome["headers"] = {}
+    else:
+        outcome = run_academy_lab(
+            lab_id,
+            request.values,
+            request.headers,
+            session,
+            session.get("uid"),
+            secure=session.get("secure_mode", False),
+        )
+    response = jsonify(outcome["data"])
+    response.status_code = outcome["status"]
+    response.headers.update(outcome["headers"])
+    if outcome["finding"] and not session.get("secure_mode", False):
+        response.headers["X-Lab-Flag"] = current_app.config["FLAGS"][lab_id]
+    return response
+
+
+@extra_labs_bp.route("/burp-profile", methods=["GET", "POST"])
+def burp_profile():
+    """Provide an isolated form for the Burp Repeater mass-assignment lab."""
+    login_response = require_login()
+    if login_response:
+        return login_response
+
+    connection = get_db()
+    user_id = session["uid"]
+    secure = session.get("secure_mode", False)
+    if request.method == "GET":
+        user = connection.execute(
+            "SELECT email,role FROM users WHERE id=?", (user_id,)
+        ).fetchone()
+        return render_template("labs/burp_profile.html", user=user)
+
+    submitted = request.form
+    if not submitted or set(submitted) - {"email", "role"}:
+        return jsonify(error="Form hanya mendukung field email dan role."), 400
+    if "role" in submitted and submitted["role"] not in {"user", "admin"}:
+        return jsonify(error="Role tidak dikenal."), 400
+
+    # VULN[burp-repeater]
+    update_profile(connection, submitted.items(), user_id, secure=secure)
+    connection.commit()
+    user = connection.execute(
+        "SELECT email,role FROM users WHERE id=?", (user_id,)
+    ).fetchone()
+    response = jsonify(email=user["email"], role=user["role"])
+    if user["role"] == "admin" and not secure:
+        response.headers["X-Lab-Flag"] = current_app.config["FLAGS"]["burp-repeater"]
+    return response
 
 
 @extra_labs_bp.route("/blind-sqli")
