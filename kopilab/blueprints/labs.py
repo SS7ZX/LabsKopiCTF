@@ -1,6 +1,7 @@
 """Learning lab index, details, hints, and flag submission."""
 
 from pathlib import Path
+import re
 import secrets
 
 from flask import Blueprint, Response, current_app, flash, redirect, render_template, request, session, url_for
@@ -228,7 +229,7 @@ def read_lesson(lab_id: str) -> dict[str, object]:
         "root_cause": sections.get("akar masalah", "").strip(),
         "fix": sections.get("perbaikan", "").strip(),
         "steps": [
-            line.strip().removeprefix("- ").removeprefix("* ").strip()
+            re.sub(r"^(?:[-*]\s+|\d+[.)]\s+)", "", line.strip())
             for line in sections.get("langkah latihan", "").splitlines()
             if line.strip()
         ],

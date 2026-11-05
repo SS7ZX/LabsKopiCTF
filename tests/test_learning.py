@@ -27,6 +27,12 @@ def test_every_lab_has_material_hints_solution_and_side_by_side_diff(client):
         assert b"Petunjuk 1" not in response.data, lab_id
 
 
+def test_practice_steps_do_not_repeat_their_list_numbers(client):
+    for lab_id, *_ in LABS:
+        response = client.get(f"/labs/{lab_id}")
+        assert b"<li>1. " not in response.data, lab_id
+
+
 def test_lab_detail_starts_with_hints_and_solution_hidden(client):
     response = client.get("/labs/sqli-union")
     assert response.status_code == 200
@@ -35,6 +41,17 @@ def test_lab_detail_starts_with_hints_and_solution_hidden(client):
     assert b"Petunjuk 1" not in response.data
     assert b"Akar masalah" not in response.data
     assert b"Buka solusi lengkap" in response.data
+
+
+def test_sqli_union_lesson_explains_burp_request_and_secure_comparison(client):
+    response = client.get("/labs/sqli-union")
+    assert response.status_code == 200
+    assert b"HTTP history" in response.data
+    assert b"UNION SELECT 1" in response.data
+    assert b"FROM secrets" in response.data
+    assert b"empat kolom" in response.data
+    assert b"mode Vulnerable" in response.data
+    assert b"mode Secure" in response.data
 
 
 def test_hints_open_one_at_a_time_and_solution_is_revealed_on_request(client):
