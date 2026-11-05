@@ -59,6 +59,10 @@ membaca cookie, atau mengirim data ke layanan lain. Hentikan dengan `Ctrl+C`.
 6. Ganti ke **Secure** dan ulangi permintaan untuk membandingkan hasilnya.
 7. Lihat scoreboard SQLite atau unduh template laporan Markdown per lab.
 
+Untuk penjelasan arsitektur, database, alur request, seluruh route utama,
+mode, Inspector, dan peta 20 lab, buka menu **Deep Dive** di navigasi atau
+kunjungi <http://127.0.0.1:5000/guide>.
+
 Setiap halaman lab menggunakan bahasa sederhana dan menyediakan tujuan,
 alamat tempat mencoba, langkah praktikum, tiga petunjuk bertahap, solusi,
 alasan bug terjadi, dan cara memperbaikinya. Membuka solusi bukan kegagalan:

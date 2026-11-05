@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Panduan Deep Dive{% endblock %}
+{% block content %}
+<header class="guide-hero">
+  <p class="eyebrow">PANDUAN SISTEM KOPILAB</p>
+  <h1>Deep Dive: kenali seluruh KopiLab</h1>
+  <p>Kita telusuri apa yang terjadi dari saat kamu membuka halaman sampai hasilnya kembali ke browser. Tidak harus paham semuanya sekaligus—pilih satu bagian, baca, lalu lihat langsung di aplikasi.</p>
+  <a class="button button-light" href="#alur">Mulai dari alur aplikasi ↓</a>
+</header>
+
+<nav class="guide-toc" aria-label="Daftar isi panduan">
+  <a href="#alur">Alur request</a><a href="#struktur">Struktur kode</a><a href="#database">Database</a>
+  <a href="#mode">Dua mode</a><a href="#toko">Sistem toko</a><a href="#belajar">Sistem belajar</a>
+  <a href="#inspector">Inspector</a><a href="#labs">Semua lab</a><a href="#tes">Tes</a>
+</nav>
+
+<section class="guide-section" id="alur">
+  <p class="eyebrow">1 · DARI KLIK KE HASIL</p><h2>Bagaimana sebuah halaman dibuka?</h2>
+  <p>Bayangkan browser seperti pelanggan yang mengirim pesanan ke dapur. Browser meminta alamat, Flask memilih fungsi yang menangani alamat itu, fungsi membaca atau mengubah data SQLite, lalu Jinja menyusun halaman HTML untuk dikirim kembali.</p>
+  <ol class="guide-steps">
+    <li><strong>Browser mengirim request.</strong> Contoh: membuka halaman depan atau mengirim form login.</li>
+    <li><strong>Flask mencocokkan URL.</strong> Route di dalam blueprint menentukan fungsi yang dijalankan.</li>
+    <li><strong>Fungsi memeriksa input dan sesi.</strong> Sesi menyimpan konteks browser seperti akun yang sedang masuk dan pilihan mode.</li>
+    <li><strong>Database membaca atau menyimpan data.</strong> Contohnya daftar produk, pesanan, atau progres lab.</li>
+    <li><strong>Template Jinja membuat tampilan.</strong> HTML memakai data yang diberikan route dan mewarisi kerangka `base.html`.</li>
+    <li><strong>Browser menerima respons.</strong> Respons bisa berupa halaman, JSON untuk API, redirect, atau file.</li>
+  </ol>
+  <div class="guide-callout"><strong>Coba sendiri:</strong> buka toko, lalu pencet halaman produk. Pada Request Inspector, perhatikan method, alamat, SQL terakhir, dan header respons. Setiap klik biasanya menghasilkan request baru.</div>
+</section>
+
+<section class="guide-section" id="struktur">
+  <p class="eyebrow">2 · PETA SOURCE CODE</p><h2>Di mana bagian-bagian aplikasi tinggal?</h2>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Lokasi</th><th>Tugasnya</th><th>Analogi</th></tr></thead><tbody>
+    <tr><td><code>run.py</code></td><td>Menyalakan aplikasi pada 127.0.0.1:5000 dengan debug mati.</td><td>Sakelar utama toko.</td></tr>
+    <tr><td><code>kopilab/__init__.py</code></td><td>Membuat Flask app, mendaftarkan blueprint, menyiapkan konteks global.</td><td>Menyusun semua bagian sebelum toko buka.</td></tr>
+    <tr><td><code>kopilab/config.py</code></td><td>Alamat database, flag, metadata lab, dan pengaturan.</td><td>Buku pengaturan.</td></tr>
+    <tr><td><code>kopilab/db.py</code></td><td>Membuat/migrasi tabel, seed, membuka dan menutup koneksi.</td><td>Gudang data dan daftar stok.</td></tr>
+    <tr><td><code>kopilab/blueprints/</code></td><td>Route dikelompokkan menurut toko, akun, login, lab, API, dan lainnya.</td><td>Bagian pelayanan berbeda di toko.</td></tr>
+    <tr><td><code>kopilab/vulns/</code></td><td>Perilaku lab yang sengaja rentan dan pilihan pemeriksaan aman.</td><td>Meja eksperimen kecil per topik.</td></tr>
+    <tr><td><code>kopilab/templates/</code></td><td>HTML Jinja untuk halaman toko dan pembelajaran.</td><td>Desain halaman yang dilihat pelanggan.</td></tr>
+    <tr><td><code>kopilab/static/</code></td><td>CSS, JavaScript, dan ilustrasi SVG yang bisa dipakai offline.</td><td>Cat, papan tanda, dan gambar toko.</td></tr>
+    <tr><td><code>labs/</code></td><td>Materi, langkah, hints, dan solusi dalam Markdown per lab.</td><td>Buku kerja siswa.</td></tr>
+    <tr><td><code>tests/</code></td><td>Memastikan contoh rentan terdeteksi dan mode aman menolaknya.</td><td>Daftar pemeriksaan kualitas.</td></tr>
+  </tbody></table></div>
+  <p><strong>Arti blueprint:</strong> blueprint hanya cara mengelompokkan route. Ia tetap menjadi bagian dari satu aplikasi Flask; bukan server atau website terpisah.</p>
+  <h3>Cara menelusuri satu fitur di source code</h3>
+  <ol class="guide-steps">
+    <li>Mulai dari tabel route atau URL yang terlihat di browser.</li>
+    <li>Cari route tersebut di file blueprint yang sesuai, misalnya pencarian berada di `kopilab/blueprints/shop.py`.</li>
+    <li>Ikuti pemanggilan helper di `kopilab/vulns/` untuk melihat bagian latihan yang berbeda antara mode.</li>
+    <li>Lihat `kopilab/templates/` untuk memahami bagaimana hasil route ditampilkan.</li>
+    <li>Cari tes bernama mirip di `tests/` untuk melihat input uji dan hasil yang diharapkan.</li>
+  </ol>
+</section>
+
+<section class="guide-section" id="database">
+  <p class="eyebrow">3 · SQLITE DAN DATA</p><h2>Apa yang disimpan di database?</h2>
+  <p>SQLite adalah file database lokal. Ketika aplikasi pertama kali berjalan, KopiLab membuat tabel dan mengisi data contoh. Tidak perlu memasang server database tambahan.</p>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Tabel</th><th>Contoh isi</th><th>Digunakan untuk</th></tr></thead><tbody>
+    <tr><td><code>users</code></td><td>Username, password seed, email, role, saldo.</td><td>Login, akun, otorisasi, simulasi bisnis.</td></tr>
+    <tr><td><code>products</code></td><td>Nama, harga, deskripsi, kategori, gambar.</td><td>Katalog, detail produk, pencarian, checkout.</td></tr>
+    <tr><td><code>orders</code></td><td>Pemilik, produk, jumlah, total, catatan.</td><td>Riwayat dan lab kontrol kepemilikan.</td></tr>
+    <tr><td><code>reviews</code></td><td>Produk, penulis, teks, rating.</td><td>Ulasan dan simulasi stored XSS.</td></tr>
+    <tr><td><code>wishlist</code></td><td>Pasangan ID pengguna dan produk.</td><td>Daftar produk yang disimpan.</td></tr>
+    <tr><td><code>lab_solves</code></td><td>ID pelajar samaran, ID lab, waktu selesai.</td><td>Progres dan scoreboard persisten.</td></tr>
+    <tr><td><code>request_inspector</code></td><td>Method, path, SQL tercatat, header respons.</td><td>Panel Inspector untuk satu request terakhir.</td></tr>
+    <tr><td>Tabel latihan tambahan</td><td>Token reset, redemption kupon, hitungan percobaan.</td><td>Mendukung skenario Secure/Vulnerable masing-masing lab.</td></tr>
+  </tbody></table></div>
+  <div class="guide-callout"><strong>Bedakan data sesi dan data database:</strong> sesi browser mengenali pemain, mode, keranjang, dan hint yang sedang dibuka. Progres yang tahan setelah halaman berpindah disimpan di tabel SQLite `lab_solves`, bukan hanya di cookie.</div>
+  <p>Tombol “Reset progres saya” menghapus progres pemain ini saja. “Reset database lokal” mengembalikan data seed dan menghapus progres semua pemain dalam database lokal—pakai hanya jika memang ingin mulai ulang.</p>
+</section>
+
+<section class="guide-section" id="mode">
+  <p class="eyebrow">4 · VULNERABLE VS SECURE</p><h2>Satu alamat, dua pelajaran</h2>
+  <p>Pilihan mode ada di header dan disimpan dalam sesi browser. URL lab tidak berubah. Route yang sama membaca pilihan mode dan memilih perilaku latihan atau pemeriksaan aman.</p>
+  <div class="mode-explainer"><article><span class="mode-label vulnerable">Vulnerable</span><h3>Perhatikan kesalahannya</h3><p>Untuk lab, server sengaja melakukan satu hal yang salah agar dampaknya bisa diamati—misalnya memakai harga dari form browser.</p></article><article><span class="mode-label secure">Secure</span><h3>Ulangi setelah diperbaiki</h3><p>Handler yang sama memeriksa data dari sumber tepercaya. Contohnya mengambil harga katalog dari database, bukan mempercayai nilai kiriman browser.</p></article></div>
+  <div class="guide-callout"><strong>Belajar yang disarankan:</strong> catat hasil Vulnerable, ganti mode, kirim request yang sama, lalu jelaskan perubahan apa yang membuat server menolak bug tersebut. Ini aplikasi belajar lokal, bukan contoh konfigurasi produksi siap pakai.</div>
+</section>
+
+<section class="guide-section" id="toko">
+  <p class="eyebrow">5 · SIMULASI TOKO</p><h2>Alur belanja sebagai contoh aplikasi nyata</h2>
+  <ol class="guide-steps">
+    <li><strong>Katalog dan pencarian:</strong> halaman depan mengambil daftar produk dari SQLite. Pencarian mengirim kata kunci melalui query string.</li>
+    <li><strong>Detail dan ulasan:</strong> route produk mengambil satu produk serta ulasan dan rating yang terkait.</li>
+    <li><strong>Keranjang:</strong> beberapa produk dan jumlahnya disimpan di sesi browser supaya mudah dibawa antarhalaman.</li>
+    <li><strong>Checkout keranjang:</strong> alur toko biasa menghitung ulang harga dari katalog server dan membuat order.</li>
+    <li><strong>Checkout lab lama:</strong> `/checkout` sengaja tetap ada agar flag lama dan pelajaran manipulasi harga tetap berfungsi.</li>
+    <li><strong>Akun dan akses:</strong> login, profil, transfer, riwayat, wishlist, dan panel admin punya route masing-masing.</li>
+  </ol>
+  <h3>Peta alamat utama</h3>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Alamat</th><th>Fungsi</th><th>Bagian kode</th></tr></thead><tbody>
+    <tr><td><code>/</code>, <code>/search</code>, <code>/product/&lt;id&gt;</code></td><td>Katalog, pencarian, detail dan review.</td><td><code>blueprints/shop.py</code></td></tr>
+    <tr><td><code>/cart</code>, <code>/cart/checkout</code></td><td>Keranjang dan checkout toko biasa.</td><td><code>blueprints/shop.py</code></td></tr>
+    <tr><td><code>/checkout</code>, <code>/order/&lt;id&gt;</code></td><td>Alur checkout dan order untuk latihan lama.</td><td><code>blueprints/shop.py</code> + helper vuln terkait.</td></tr>
+    <tr><td><code>/login</code>, <code>/register</code>, <code>/reset</code></td><td>Akun, masuk, daftar, dan pemulihan password.</td><td><code>blueprints/auth.py</code></td></tr>
+    <tr><td><code>/me</code>, <code>/profile</code>, <code>/transfer</code>, <code>/orders</code></td><td>Profil dan aktivitas akun.</td><td><code>blueprints/account.py</code></td></tr>
+    <tr><td><code>/wishlist</code>, <code>/admin</code>, <code>/api/user/&lt;id&gt;</code></td><td>Produk tersimpan, admin demo, dan API JSON.</td><td>Shop, admin, dan API blueprints.</td></tr>
+    <tr><td><code>/download</code>, <code>/preview</code></td><td>Download file lab dan preview service lokal.</td><td><code>blueprints/files.py</code></td></tr>
+  </tbody></table></div>
+  <p>Karena ini toko simulasi belajar, akun memakai data seed sederhana. Jangan memakai password ini untuk akun sungguhan dan jangan mengunggah aplikasi rentan ini ke internet.</p>
+</section>
+
+<section class="guide-section" id="belajar">
+  <p class="eyebrow">6 · CARA BELAJAR DI TIAP LAB</p><h2>Urutan yang membantu saat buntu</h2>
+  <ol class="guide-steps">
+    <li>Baca tujuan dan endpoint target. Cari tahu halaman atau request yang sedang diuji.</li>
+    <li>Lakukan langkah praktikum lokal. Ubah satu nilai dalam satu waktu agar sebab dan hasilnya mudah terlihat.</li>
+    <li>Bandingkan respons atau data. Gunakan Inspector bila perlu.</li>
+    <li>Buka Petunjuk 1. Kalau masih buntu, lanjutkan Petunjuk 2 dan 3.</li>
+    <li>Tidak apa-apa membuka solusi kapan saja. Baca jawaban, akar masalah, dan perbaikannya.</li>
+    <li>Kirim flag untuk menyimpan progres; ulangi request dalam Secure dan jelaskan kenapa hasilnya berubah.</li>
+  </ol>
+  <p>Flag adalah tanda bahwa kamu berhasil mencapai kondisi latihan. Flag bukan password atau data pengguna. Sebagian lab menampilkannya di respons halaman, JSON, atau header `X-Lab-Flag` sesuai contoh.</p>
+  <h3>Progres dan laporan</h3>
+  <p>Submit flag pada kartu lab atau di halaman detail. Server mencocokkan flag, lalu menulis satu baris ke <code>lab_solves</code>; constraint database mencegah satu lab terhitung dua kali untuk pemain yang sama. Halaman <code>/scoreboard</code> merangkum jumlahnya. Tautan laporan pada halaman lab membuat template Markdown berisi ringkasan, severity latihan, langkah reproduksi, dampak, dan rekomendasi.</p>
+</section>
+
+<section class="guide-section" id="inspector">
+  <p class="eyebrow">7 · REQUEST INSPECTOR</p><h2>Jendela untuk melihat “di balik layar”</h2>
+  <p>Panel Inspector di bawah halaman menyimpan ringkasan request terakhir untuk pemain lokal yang sama.</p>
+  <ul class="guide-list">
+    <li><strong>Method dan path:</strong> jenis aksi HTTP (misalnya GET untuk membaca, POST untuk mengirim form) dan alamat yang diminta.</li>
+    <li><strong>SQL terakhir:</strong> query yang secara eksplisit dicatat oleh route latihan. Pada Secure, nilai input terikat sebagai parameter, bukan ditempel ke sintaks SQL.</li>
+    <li><strong>Header respons:</strong> metadata server/browser seperti Content-Type, status, dan cookie. Header dapat berubah berdasarkan mode.</li>
+  </ul>
+  <p><strong>Batasan penting:</strong> ini inspector pembelajaran, bukan pencatat semua operasi database. Ia menampilkan query yang dicatat route tertentu; request tanpa query tercatat menampilkan pesan bahwa tidak ada SQL pada request itu.</p>
+  <p>Urutan melihat data juga penting: panel di respons halaman membaca catatan request sebelumnya, sebab catatan request yang sedang berlangsung baru disimpan saat respons akan dikirim.</p>
+</section>
+
+<section class="guide-section" id="lokal">
+  <p class="eyebrow">8 · BATAS LAB</p><h2>Kenapa simulator harus tetap lokal?</h2>
+  <p>CSRF simulator berjalan di port 9000 dan service SSRF latihan di port 5001. Keduanya bind hanya ke `127.0.0.1`; SSRF dibatasi ke service internal KopiLab. Upload disimpan di folder proyek dan tidak pernah dijalankan. Simulator tidak membaca cookie, tidak menebak password, dan tidak menghubungi situs pihak lain.</p>
+  <p>Untuk mencoba simulator CSRF, buka terminal kedua lalu jalankan <code>python run_attacker.py</code>; halaman tetap hanya ditujukan ke `127.0.0.1:5000`. Service SSRF port 5001 mulai bersama aplikasi utama dari `run.py`.</p>
+  <div class="guide-callout guide-warning"><strong>Aturan kelas:</strong> lakukan request hanya ke KopiLab di komputer sendiri. Jangan ganti tujuan ke alamat internet, komputer teman, alamat kantor/kampus, atau server publik. Hentikan server dengan Ctrl+C setelah kelas.</div>
+</section>
+
+<section class="guide-section" id="labs">
+  <p class="eyebrow">9 · PETA SELURUH LAB</p><h2>20 latihan yang bisa dipelajari</h2>
+  <p>Klik judul untuk membuka langkah praktikum, hints, dan solusi lengkap. Kategori A01/A03 dan seterusnya mengacu pada kelompok OWASP Top 10 2021.</p>
+  <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Lab</th><th>Yang dipelajari</th><th>OWASP</th><th>Level</th><th>Target lokal</th></tr></thead><tbody>
+  {% for lab in labs %}<tr><td><a href="{{ url_for('labs.lab_detail', lab_id=lab['id']) }}">{{ lab['title'] }}</a></td><td>{{ lab['category'] }}</td><td>{{ lab['category_id'] }}</td><td>{{ lab['level'] }}</td><td><code>{{ lab['endpoint'] }}</code></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="guide-section" id="tes">
+  <p class="eyebrow">10 · CARA MEMASTIKAN SISTEM</p><h2>Apa yang diperiksa oleh tes otomatis?</h2>
+  <ul class="guide-list">
+    <li>Tes mode Vulnerable memastikan perilaku lab lama dan tambahan masih bisa diamati pada data lokal.</li>
+    <li>Tes Secure memastikan input serupa ditolak atau diproses dengan aturan lebih aman.</li>
+    <li>Tes toko memeriksa katalog, detail produk, keranjang, checkout, wishlist, dan halaman akun.</li>
+    <li>Tes belajar memeriksa semua halaman materi, hints, solusi, submit flag, scoreboard, reset, Inspector, dan laporan.</li>
+  </ul>
+  <div class="guide-callout"><strong>Menjalankan tes di Windows:</strong><br><code>.venv\Scripts\activate</code><br><code>python -m pytest -q</code><br>Tes memakai database sementara. Database toko lokalmu tidak dipakai oleh tes.</div>
+  <p class="guide-end"><strong>Ringkasnya:</strong> browser mengirim request → Flask memilih route → handler menjalankan aturan mode → SQLite menyimpan atau membaca data → Jinja menyusun respons. Saat memahami satu route, ikuti urutan ini dan kamu bisa menelusuri hampir semua fitur KopiLab.</p>
+</section>
+{% endblock %}

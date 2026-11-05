@@ -19,6 +19,7 @@
       <a href="{{ url_for('shop.index') }}">Belanja</a>
       <a href="{{ url_for('shop.cart') }}">Keranjang <span class="count">{{ cart_count }}</span></a>
       <a href="{{ url_for('labs.labs') }}">Labs</a>
+      <a href="{{ url_for('guide.deep_dive') }}">Deep Dive</a>
       <a href="{{ url_for('labs.scoreboard') }}">Scoreboard</a>
       {% if current_user %}
         <a href="{{ url_for('account.me') }}">Hai, {{ current_user }}</a>

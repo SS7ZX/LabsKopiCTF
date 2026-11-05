@@ -31,10 +31,12 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     from .blueprints.labs import labs_bp
     from .blueprints.files import files_bp
     from .blueprints.extra_labs import extra_labs_bp
+    from .blueprints.guide import guide_bp
     from .blueprints.shop import shop_bp
 
     for blueprint in (
-        shop_bp, auth_bp, account_bp, admin_bp, api_bp, labs_bp, files_bp, extra_labs_bp
+        shop_bp, auth_bp, account_bp, admin_bp, api_bp, labs_bp, files_bp,
+        extra_labs_bp, guide_bp
     ):
         app.register_blueprint(blueprint)
     app.teardown_appcontext(close_db)
