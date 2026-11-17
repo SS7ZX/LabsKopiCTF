@@ -30,6 +30,18 @@ Jangan menerima ekspresi SQL dari request; gunakan parameter untuk nilai data da
 ## Contoh aman
 Tentukan hasil dari data yang dipilih server melalui query berparameter; jangan izinkan fragmen SQL sebagai input.
 
+## Analisis Mendalam
+- **Model oracle:** endpoint hanya mengembalikan boolean. Ia tidak menampilkan baris database, sehingga bukti yang diamati adalah perbedaan hasil antara kondisi benar dan salah, bukan isi tabel.
+- **Eksperimen terkontrol:** gunakan hanya dua kondisi fixture yang disebut di langkah latihan. Pertahankan endpoint dan parameter tetap, lalu bandingkan JSON `result`, status, error, dan header flag.
+- **Makna perbedaan:** bila satu kondisi menghasilkan `true` dan kondisi pembanding `false`, input memengaruhi evaluasi server. Itu cukup untuk mengenali oracle; jangan menyusun rangkaian tebakan atau mengekstrak data.
+- **Secure:** input kondisi mentah tidak boleh diteruskan ke interpreter SQL. Respons Secure dapat menolak format tersebut, tetapi tetap harus memberikan respons valid untuk fungsi aplikasi yang sah.
+- **Akar mitigasi:** parameter SQL hanya untuk nilai data; struktur query harus tetap ditentukan kode server. Menghapus kata tertentu dari input tidak memperbaiki injeksi.
+
+## Bukti yang Dicatat
+- Kondisi fixture yang dipakai (benar/salah), mode, status, dan nilai JSON `result`.
+- Ada/tidaknya header `X-Lab-Flag`; jangan menambahkan percobaan di luar pasangan kondisi dalam materi.
+- Hasil Secure untuk input yang sama dan ringkasan mengapa parameterisasi menutup jalur evaluasi.
+
 ## Langkah latihan
 1. Buka `/extra/blind-sqli?condition=1%3D1` pada KopiLab lokal. Nilai `%3D` adalah tanda `=` di alamat web.
 2. Lihat JSON: oracle hanya menjawab `true` atau `false`; flag latihan ada di header respons.

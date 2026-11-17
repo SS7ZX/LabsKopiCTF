@@ -30,6 +30,18 @@ Memverifikasi token dengan secret `kopilab`.
 ## Contoh aman
 Verifikasi HS256 dengan kunci kriptografis acak hanya dari konfigurasi server.
 
+## Analisis Mendalam
+- **Struktur token:** header dan payload JWT dapat dibaca setelah Base64URL decoding; keduanya bukan bukti keaslian. Signature-lah yang mengikat klaim pada kunci penandatangan.
+- **Eksperimen lokal:** ambil token fixture dari `GET /extra/jwt`, lalu gunakan helper lokal yang disebut materi untuk mengirim token demo ke endpoint yang sama. Jangan gunakan token atau secret dari layanan lain.
+- **Bukti:** periksa status dan claims yang dikembalikan, khususnya role; cocokkan dengan header flag. Perubahan teks payload saja tidak cukup bila signature tidak valid.
+- **Secure:** secret konfigurasi berbeda, sehingga token yang dibuat memakai secret demo tidak boleh diterima. Verifikasi juga harus mengunci algoritma yang diizinkan, bukan mempercayai algoritma dari token.
+- **Batas klaim:** secret lemah pada fixture menjelaskan kegagalan tanda tangan; JWT tidak mengenkripsi isi sehingga token tetap tidak cocok untuk menyimpan rahasia.
+
+## Bukti yang Dicatat
+- Sumber token (fixture lokal), endpoint POST, status, role yang direspons, dan ada/tidaknya flag.
+- Perbandingan token demo pada Vulnerable dan Secure tanpa menempelkan token penuh atau secret ke catatan.
+- Mitigasi: secret kuat, algoritma tetap, validasi expiry/issuer/audience sesuai kebutuhan, dan rotasi kunci.
+
 ## Langkah latihan
 1. Buka `GET /extra/jwt` di KopiLab lokal untuk menerima token demo pengguna biasa.
 2. Baca token sebagai tiga bagian: header, klaim, dan tanda tangan. Token bukan data rahasia yang dienkripsi.

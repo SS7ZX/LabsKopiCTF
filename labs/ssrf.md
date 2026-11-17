@@ -30,6 +30,18 @@ Gunakan allowlist host dan skema, blok alamat non-loopback, cegah redirect kelua
 ## Contoh aman
 Validasi tujuan terhadap satu service lab loopback tetap sebelum request.
 
+## Analisis Mendalam
+- **Dua koneksi berbeda:** browser mengirim request ke `127.0.0.1:5000/preview`; kemudian server KopiLab yang melakukan fetch ke service latihan `127.0.0.1:5001`. Repeater hanya mengubah request pertama.
+- **Baseline:** gunakan URL persis yang disediakan materi. Catat response preview, status, dan apakah konten berasal dari service simulasi; tidak perlu mengubah tujuan.
+- **Bukti:** parameter URL yang diterima serta isi hasil menunjukkan bahwa server melakukan fetch. Jangan menguji host, skema, redirect, atau port lain di luar fixture.
+- **Secure:** URL service latihan yang tepat tetap berfungsi, sedangkan tujuan yang tidak diizinkan ditolak sebelum koneksi dilakukan.
+- **Mitigasi:** validasi skema, hostname, port, alamat hasil resolusi, dan redirect; tambahkan pembatasan egress di deployment. Allowlist harus diterapkan pada tujuan final, bukan sekadar memeriksa teks URL.
+
+## Bukti yang Dicatat
+- URL lokal yang diminta, status/response preview, dan fakta bahwa port 5001 adalah service simulasi.
+- Perbandingan keberhasilan fixture yang tepat dengan penolakan Secure; jangan mencatat atau mencoba tujuan eksternal.
+- Rekomendasi allowlist dan validasi tujuan setelah resolusi/redirect.
+
 ## Langkah latihan
 1. Pastikan KopiLab berjalan; saat dijalankan lewat `run.py`, service latihan ada di `127.0.0.1:5001`.
 2. Buka `/preview?url=http://127.0.0.1:5001/` pada aplikasi lokal.

@@ -30,6 +30,18 @@ Counter bertambah terus tanpa penolakan.
 ## Contoh aman
 Batas percobaan sementara dengan cooldown yang terukur dan pemulihan setelah jangka waktu tertentu.
 
+## Analisis Mendalam
+- **Model state:** endpoint `/extra/rate-login` menambah counter per identitas sesi latihan; ia tidak memeriksa username/password dan bukan endpoint login sebenarnya.
+- **Metode:** catat nilai awal, kirim hanya jumlah request manual yang ditentukan materi (maksimum enam), lalu amati counter dan status setiap respons. Tidak perlu menguji kredensial.
+- **Bukti:** pada Vulnerable counter terus naik; pada Secure ambang tercapai lalu response `429`. Bedakan throttling dari error format atau sesi yang hilang dengan membaca body/status.
+- **Perbaikan produksi:** tentukan batas berdasarkan beberapa sinyal yang sesuai (akun, IP, perangkat), cooldown/backoff, monitoring, dan respons yang tidak mengungkap apakah akun tertentu ada.
+- **Batas kesimpulan:** fixture ini memperagakan kebijakan counter; ia bukan benchmark kapasitas dan tidak mengukur ketahanan sistem autentikasi nyata.
+
+## Bukti yang Dicatat
+- Jumlah request manual, counter/status tiap respons, sesi latihan yang digunakan, dan mode.
+- Ambang saat Secure mulai menolak dengan `429`; jangan memakai automation atau password guessing.
+- Kondisi awal dan alasan bahwa counter lab bukan percobaan login yang sesungguhnya.
+
 ## Langkah latihan
 1. Endpoint ini hanya mencatat percobaan simulasi; ia tidak mencoba username atau password.
 2. Kirim POST ke `/extra/rate-login` enam kali pada sesi browser KopiLab yang sama.

@@ -30,6 +30,18 @@ Menerima semua ekstensi dari nama file pengguna.
 ## Contoh aman
 Allowlist tipe gambar, validasi signature, simpan sebagai nama yang dibuat server di lokasi non-eksekusi.
 
+## Analisis Mendalam
+- **Kontrol yang berbeda:** ekstensi nama, MIME yang dikirim klien, signature isi file, ukuran, nama penyimpanan, dan lokasi eksekusi adalah hal terpisah. Satu pemeriksaan tidak menggantikan pemeriksaan lainnya.
+- **Request Repeater:** tangkap upload teks kecil dari form; pertahankan boundary multipart dan ubah hanya nama/tipe yang diminta langkah lab. Jangan mengunggah executable atau file berisi data pribadi.
+- **Bukti:** periksa status, nama tersimpan, header flag, dan lokasi proyek. Penerimaan file bukan berarti file dijalankan—simulator tidak mengeksekusi upload.
+- **Secure:** file teks ditolak; tipe yang diizinkan tetap mengikuti allowlist. Uji menggunakan file gambar latihan yang aman bila perlu mengonfirmasi alur sah.
+- **Mitigasi:** validasi allowlist di server, ukuran, signature/content, buat nama acak, simpan di luar web root dengan izin minimal, dan sajikan sebagai download non-eksekusi.
+
+## Bukti yang Dicatat
+- Nama field file, filename/ekstensi, Content-Type, status, dan nilai `saved`/flag.
+- Jenis file aman yang digunakan dan perbedaan keputusan Vulnerable/Secure.
+- Tegaskan bahwa upload disimpan dalam folder fixture dan tidak pernah dieksekusi; jangan lampirkan file sensitif.
+
 ## Langkah latihan
 1. Siapkan file teks kecil berisi tulisan biasa—jangan pernah unggah program atau file berbahaya.
 2. Kirim sebagai field `file` ke `POST /extra/upload` pada KopiLab lokal.

@@ -34,6 +34,18 @@ Gunakan query berparameter seperti `SELECT id,name,price,description FROM produc
 ## Contoh aman
 `connection.execute("SELECT id,name,price,description FROM products WHERE name LIKE ? AND id<99", ("%" + query + "%",))`
 
+## Analisis Mendalam
+- **Bentuk query:** pencarian produk menghasilkan empat kolom. `UNION` hanya dapat digabungkan bila jumlah kolom dan tipe/posisinya sesuai; di fixture ini nilai flag muncul pada kolom deskripsi.
+- **Peran input:** tanda kutip mengakhiri literal pencarian, hasil SELECT tambahan memperluas hasil, dan komentar mengabaikan sisa query yang ditambahkan aplikasi. Karakter khusus harus dikirim melalui form atau encoding URL yang tepat.
+- **Bukti:** cocokkan hasil tambahan pada halaman/response dengan query di Request Inspector. Pastikan baris berasal dari tabel latihan `secrets`; error SQL saja tidak membuktikan data berhasil dibaca.
+- **Secure:** parameter `?` menjaga nilai `q` sebagai data. Input yang sama boleh dicari sebagai teks tetapi tidak boleh mengubah struktur query atau mengembalikan baris rahasia.
+- **Mitigasi:** parameterisasi adalah kontrol inti. Validasi pencarian dapat memperbaiki UX, tetapi filter karakter bukan pengganti query berparameter.
+
+## Bukti yang Dicatat
+- Request `GET /search`, nilai `q` yang diuji (jangan menyalin cookie), status, hasil tambahan, dan query Inspector jika tersedia.
+- Mode Vulnerable dibanding Secure dengan input sama: keberadaan atau ketiadaan baris fixture.
+- Catat jumlah/kolom hasil dan alasan input diperlakukan sebagai data pada mode aman.
+
 ## Langkah latihan
 - Pastikan aplikasi KopiLab berjalan di komputermu sendiri pada `http://127.0.0.1:5000`. Pada halaman lab ini, pilih mode `Vulnerable` dari tombol mode di bagian atas. Mode ini memang disediakan untuk latihan lokal.
 - Buka Burp Suite, pilih `Proxy`, lalu klik `Open browser`. Di browser Burp, buka KopiLab dan gunakan kotak pencarian untuk mencari `Gayo`. Jangan nyalakan Intercept dulu; pastikan statusnya `Intercept is off` supaya browser tidak tertahan.

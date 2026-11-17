@@ -30,6 +30,18 @@ POST transfer hanya memerlukan cookie sesi.
 ## Contoh aman
 Tolak POST bila token form tidak cocok dengan token sesi.
 
+## Analisis Mendalam
+- **Batas kepercayaan:** browser secara otomatis menyertakan cookie sesi yang berlaku; keberadaan cookie membuktikan sesi, bukan niat pengguna untuk melakukan transfer tertentu.
+- **Alur yang diamati:** simulator lokal memicu `POST /transfer`. Bandingkan method, penerima, jumlah, origin/referer, dan keberadaan token CSRF; nilai token itu sendiri tidak perlu disalin ke catatan.
+- **Dampak stateful:** transfer mengubah saldo pengirim dan penerima. Catat kedua saldo sebelum dan sesudah satu demo saja agar hasil dapat dibedakan dari state lama.
+- **Interpretasi Secure:** penolakan request demo tanpa token adalah hasil yang diharapkan. Pastikan form asli KopiLab masih dapat melakukan transfer sah dengan token sesi yang benar.
+- **Pertahanan berlapis:** token yang terikat sesi dan diverifikasi server adalah kontrol utama dalam latihan ini; `SameSite` dan pemeriksaan origin membantu, tetapi kebijakan harus sesuai arsitektur aplikasi.
+
+## Bukti yang Dicatat
+- Endpoint dan origin simulator lokal, method, field `to`/`amount`, status, dan ada/tidaknya token.
+- Saldo awal/akhir akun latihan yang terlibat; jangan mengulang POST hanya untuk memperoleh screenshot tambahan.
+- Perbedaan penerimaan Vulnerable dan penolakan Secure, tanpa menyalin cookie atau token.
+
 ## Langkah latihan
 1. Jalankan `python run_attacker.py` di terminal kedua, lalu buka `http://127.0.0.1:9000`.
 2. Masuk ke KopiLab sebagai Budi di port 5000 dan buka halaman simulator.

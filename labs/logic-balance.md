@@ -30,6 +30,18 @@ Validasi kuantitas positif dalam batas stok, terapkan kupon sekali sesuai kebija
 ## Contoh aman
 Validasi `1 <= quantity <= stock`, deduplikasi kupon, lalu hitung total dari harga katalog dan aturan diskon server.
 
+## Analisis Mendalam
+- **Invariant bisnis:** kuantitas harus integer positif dalam batas stok; kupon hanya boleh dipakai menurut kebijakan, dan total akhir tidak boleh negatif.
+- **Pisahkan penyebab:** gunakan checkout terpisah untuk menguji kuantitas dan kupon duplikat. Jangan mengubah dua field sekaligus karena hasilnya tidak menunjukkan aturan mana yang gagal.
+- **Stateful effect:** checkout menulis order dan memperbarui saldo Budi. Catat saldo awal dan order sebelum uji; kirim setiap POST hanya sekali dan reset fixture lokal bila perlu.
+- **Bukti:** bandingkan field yang dikirim, total tersimpan, jumlah/kupon yang tercatat, dan saldo setelah request. Jangan mengandalkan pesan sukses saja.
+- **Secure:** input invalid harus ditolak sebelum database berubah. Validasi server tetap diperlukan meski UI hanya menampilkan pilihan yang sah.
+
+## Bukti yang Dicatat
+- Satu eksperimen per invariant: nilai kuantitas atau jumlah kupon, bukan keduanya sekaligus.
+- Saldo dan jumlah order sebelum/sesudah serta status/response yang relevan.
+- Perilaku Secure dan invariant yang ditegakkan; jangan menyamakan validasi input dengan kontrol harga server-side.
+
 ## Langkah latihan
 1. Masuk sebagai Budi. Catat saldo awal pada halaman akun.
 2. Dalam mode **Vulnerable**, kirim checkout lokal dengan jumlah `-200` untuk produk berharga Rp85.000.

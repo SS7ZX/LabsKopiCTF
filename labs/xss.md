@@ -30,6 +30,18 @@ Biarkan autoescape Jinja aktif, jangan gunakan `safe` untuk input pengguna, vali
 ## Contoh aman
 `{{ review.body }}`
 
+## Analisis Mendalam
+- **Konteks pertama:** pencarian adalah reflected output; nilai `q` segera masuk ke response. Konteks kedua: review disimpan lewat POST lalu muncul lagi pada halaman produk, sehingga state dan output harus dianalisis terpisah.
+- **Bukti browser vs response:** bandingkan input, raw HTML response, dan hasil render. Jika browser memperlakukan input sebagai elemen, output belum di-escape dengan benar; jangan hanya mengandalkan tampilan teks di satu panel.
+- **Stored-state:** review dapat bertahan sampai database latihan direset. Gunakan nilai demonstrasi non-destruktif, jangan membuat payload yang membaca atau mengirim cookie, dan jangan uji origin lain.
+- **Secure:** output harus ditampilkan sebagai teks dalam konteks yang sesuai. Template autoescape harus tetap aktif dan input pengguna tidak boleh ditandai `safe`.
+- **Pertahanan berlapis:** output encoding sesuai konteks adalah inti; validasi input membantu aturan bisnis, sedangkan `HttpOnly` mengurangi akses JavaScript ke cookie tetapi tidak menghilangkan XSS.
+
+## Bukti yang Dicatat
+- Apakah kasus reflected atau stored, endpoint/metode, dan lokasi output.
+- Perilaku raw response/browser pada kedua mode serta apakah konten disimpan/ditampilkan kembali.
+- Jangan menyimpan cookie atau memakai payload yang mengambil/mengirim data; catat hanya perilaku render.
+
 ## Langkah latihan
 1. Dalam mode **Vulnerable**, cari produk menggunakan teks `<script>alert(1)</script>`.
 2. Lihat bagaimana teks itu muncul kembali pada halaman hasil pencarian. Coba juga mengirim teks yang sama sebagai ulasan.

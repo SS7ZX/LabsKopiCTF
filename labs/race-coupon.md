@@ -30,6 +30,18 @@ Baca jumlah klaim, lalu insert setelah operasi terpisah.
 ## Contoh aman
 Transaksi write-lock dan constraint unik yang mengikat kupon kepada akun.
 
+## Analisis Mendalam
+- **Semantik endpoint:** fixture ini mensimulasikan check-then-act dengan counter yang terlihat; uji dasarnya adalah satu redeem baseline lalu satu replay manual, bukan stress test konkurensi.
+- **Hipotesis:** apakah endpoint memeriksa kupon sudah dipakai dan mencatat redemption sebagai satu operasi atomik?
+- **Bukti:** bandingkan counter sebelum/sesudah tiap request, status response kedua, dan flag. Karena state persisten, response kedua harus dibaca sebelum melakukan tindakan lain.
+- **Secure:** transaksi/constraint harus memastikan satu kupon per akun hanya tercatat sekali. Penolakan duplikat tidak boleh menaikkan counter.
+- **Batas uji:** jangan gunakan banyak request paralel, loop, Intruder, atau flood. Simulator ini cukup membuktikan cacat check-then-act tanpa mengukur performa.
+
+## Bukti yang Dicatat
+- Counter awal, hasil redeem pertama, hasil satu replay, counter akhir, dan mode.
+- Pastikan sesi akun sama dan label status/response dicatat; jangan mengulang setelah flag muncul.
+- Mitigasi atomik berupa transaksi dan constraint unik `(user_id, coupon)` dengan penanganan konflik.
+
 ## Langkah latihan
 1. Masuk ke KopiLab sebagai Budi.
 2. Kirim beberapa request POST ke `/extra/coupon` dengan cepat dari dua tab browser lokal atau request paralel.

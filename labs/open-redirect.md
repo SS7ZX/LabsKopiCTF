@@ -30,6 +30,18 @@ Redirect ke URL yang dikendalikan pengguna.
 ## Contoh aman
 Tolak URL absolute dan `//host`; izinkan path relatif internal.
 
+## Analisis Mendalam
+- **Perbedaan penting:** redirect mengubah tujuan navigasi browser; ia bukan bukti bahwa server mengambil atau mengakses URL tujuan.
+- **Baseline:** gunakan path relatif `/labs` dan catat status serta header `Location`. Ini kontrol untuk memastikan navigasi internal tetap berfungsi.
+- **Eksperimen:** ubah hanya `next` ke simulator loopback yang ditentukan materi. Pastikan target request tetap KopiLab di `127.0.0.1:5000`; simulator lokal adalah tujuan redirect latihan, bukan target pengujian baru.
+- **Bukti:** periksa 302/400 dan nilai `Location` lengkap. Flag hanya menandai skenario simulator; jangan menganggap semua tujuan eksternal dapat dicapai.
+- **Secure:** pertahankan redirect relatif yang sah dan tolak tujuan absolut maupun path yang dapat menafsirkan host lain. Validasi berbasis allowlist lebih aman daripada mencoba memblokir pola URL satu per satu.
+
+## Bukti yang Dicatat
+- Nilai `next`, status response, header `Location`, dan ada/tidaknya flag.
+- Perbedaan path internal yang sah dengan URL simulator pada kedua mode.
+- Jangan memasukkan domain publik/mesin lain atau mengikuti redirect keluar dari lingkungan lokal.
+
 ## Langkah latihan
 1. Di aplikasi lokal, coba buka `/extra/redirect?next=/labs` dan lihat header `Location`.
 2. Pada mode **Vulnerable**, coba tujuan simulator `http://127.0.0.1:9000/`.

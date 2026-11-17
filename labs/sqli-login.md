@@ -30,6 +30,18 @@ Gunakan parameter SQL dan verifikasi password yang di-hash dengan algoritma khus
 ## Contoh aman
 `connection.execute("SELECT id FROM users WHERE username=?", (username,))`
 
+## Analisis Mendalam
+- **Batas kode/data:** query login yang rentan menempelkan nilai username dan password ke SQL. Input khusus dapat mengubah kondisi query, bukan sekadar dibandingkan sebagai kredensial.
+- **Baseline:** kirim login biasa yang gagal dan amati status/redirect serta query Inspector. Gunakan akun latihan dan jangan mengirim kredensial ke host selain loopback.
+- **Bukti autentikasi:** redirect `302` belum cukup. Ikuti halaman `/me` untuk memastikan principal yang terbentuk; perhatikan bahwa login sukses mengubah session.
+- **Secure:** input uji yang sama harus diproses sebagai nilai data dan gagal autentikasi. Gunakan query berparameter, lalu verifikasi password yang di-hash dengan algoritma khusus password.
+- **Batas bukti:** pesan database atau status respons saja tidak membuktikan bypass; identitas akun pada halaman sesudah login adalah bukti relevan.
+
+## Bukti yang Dicatat
+- Endpoint/method, mode, status atau redirect, dan principal yang ditampilkan sesudahnya.
+- Perbedaan query Inspector bila tersedia, tanpa menyimpan cookie sesi atau password.
+- Hasil Secure untuk input yang sama dan alasan parameterisasi menjaga batas antara sintaks dan data.
+
 ## Langkah latihan
 1. Pastikan mode **Vulnerable**, buka Masuk, lalu kirim username biasa dan password salah.
 2. Perhatikan pesan gagal dan query yang terlihat di Request Inspector.

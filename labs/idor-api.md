@@ -30,6 +30,18 @@ Batasi query pada pemilik yang terautentikasi; berikan akses lintas akun hanya m
 ## Contoh aman
 `SELECT id, username, email FROM users WHERE id=?` dengan ID yang juga cocok dengan pengguna di sesi.
 
+## Analisis Mendalam
+- **Autentikasi vs otorisasi:** login menetapkan principal Budi, tetapi tidak otomatis memberi hak baca terhadap setiap ID pengguna yang tersedia di API.
+- **Eksperimen:** gunakan `/api/user/2` sebagai kontrol milik Budi, lalu ubah hanya ID path ke fixture admin yang ditentukan materi. Pertahankan sesi yang sama.
+- **Bukti respons:** bandingkan `id`, `username`, `role`, `balance`, dan field lain yang benar-benar dikembalikan. Status `200` saja bukan bukti kebocoran; identitas record di body yang menentukan.
+- **Secure:** objek sendiri tetap dapat dibaca sesuai kontrak endpoint, sementara objek lain harus ditolak atau tidak ditemukan tanpa mengungkap field privat.
+- **Perbaikan:** lakukan pemeriksaan kepemilikan pada query atau service layer dan pilih field response secara eksplisit; jangan mengirim seluruh row pengguna secara otomatis.
+
+## Bukti yang Dicatat
+- ID yang diminta, akun sesi (label seperti “Budi”, bukan nilai cookie), status, dan nama field yang muncul.
+- Hasil kontrol own-object serta hasil permintaan objek lain pada kedua mode.
+- Data sensitif harus dirahasiakan; catat nama field, bukan nilai rahasia.
+
 ## Langkah latihan
 1. Masuk sebagai Budi (`budi` / `budi123`) di aplikasi lokal.
 2. Buka alamat `/api/user/2` dan lihat respons JSON milik Budi.

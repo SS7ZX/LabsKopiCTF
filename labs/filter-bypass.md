@@ -30,6 +30,18 @@ Normalisasi Unicode dan kapitalisasi, gunakan allowlist sesuai konteks, serta hi
 ## Contoh aman
 Normalisasi input, lalu gunakan allowlist nama yang diizinkan.
 
+## Analisis Mendalam
+- **Hipotesis:** apakah pemeriksaan blacklist membandingkan input secara case-sensitive, sehingga kapitalisasi mengubah keputusan?
+- **Kontrol dan eksperimen:** kirim `admin` sebagai baseline, lalu ubah hanya kapitalisasi menjadi `ADMIN` pada parameter `q`. Endpoint ini hanya mengembalikan keputusan boolean dan tidak membuat akun atau menjalankan input.
+- **Bukti:** bandingkan nilai `blocked`, status, dan header flag. Jangan menyimpulkan dampak lain yang tidak ditunjukkan simulator.
+- **Secure:** normalisasi harus dilakukan sebelum kebijakan diterapkan, dan aturan harus tetap konsisten untuk variasi input yang ekuivalen.
+- **Batas solusi:** blacklist string mudah melewatkan variasi encoding, Unicode, atau konteks lain. Untuk keputusan sensitif, tentukan input yang boleh melalui allowlist dan validasi sesuai tipe data.
+
+## Bukti yang Dicatat
+- Nilai baseline dan variasi kapitalisasi, status, JSON `blocked`, serta keberadaan flag.
+- Apakah kedua variasi mendapat keputusan konsisten pada Secure.
+- Penjelasan singkat urutan normalisasi dan pemeriksaan yang diperlukan.
+
 ## Langkah latihan
 1. Buka `/extra/filter?q=admin` pada KopiLab lokal. Catat bahwa kata tersebut diblokir.
 2. Ubah hurufnya menjadi kapital: `/extra/filter?q=ADMIN`.

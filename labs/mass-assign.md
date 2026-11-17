@@ -30,6 +30,18 @@ Loop atas seluruh `request.form.items()` sebagai kolom database.
 ## Contoh aman
 `UPDATE users SET email=? WHERE id=?` dengan email tervalidasi.
 
+## Analisis Mendalam
+- **Batas kepercayaan:** seluruh body request dikendalikan klien; field yang tidak ditampilkan form tetap dapat dikirim. Karena itu UI bukan allowlist keamanan.
+- **Identitas akun:** endpoint harus mengambil ID pengguna dari sesi tervalidasi. Jangan menerima `user_id` atau role sebagai sumber identitas dari body.
+- **Eksperimen Repeater:** simpan request baseline perubahan email, kirim tanpa perubahan, lalu tambahkan hanya field `role` pada salinan body form lokal sebagaimana dijelaskan di panduan lab. Pertahankan cookie sesi, host, path, dan email.
+- **Bukti persisten:** periksa response dan halaman `/me` setelah redirect untuk memastikan role aktual; jangan menyimpulkan hanya dari status atau pesan sukses.
+- **Secure:** email yang diizinkan tetap dapat diperbarui, tetapi role harus tetap `user`. Terapkan allowlist di server dan jalur administrasi role yang terpisah dengan otorisasi/audit.
+
+## Bukti yang Dicatat
+- Baseline field email dan response sebelum perubahan.
+- Field tambahan yang diuji, role aktual di `/me`, dan header flag pada Vulnerable/Secure.
+- Jangan menaruh cookie sesi di catatan; simpulkan bahwa atribut sensitif harus dikeluarkan dari pembaruan profil.
+
 ## Langkah latihan
 1. Masuk sebagai Budi, buka profil, lalu kirim perubahan email biasa.
 2. Untuk menguji batas field di mode **Vulnerable**, tambahkan field `role=admin` pada POST profil lokal.

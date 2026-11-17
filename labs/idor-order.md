@@ -30,6 +30,18 @@ Tambahkan kondisi pemilik ke query dan kembalikan 404/403 secara konsisten bila 
 ## Contoh aman
 `SELECT * FROM orders WHERE id=? AND user_id=?`
 
+## Analisis Mendalam
+- **Pertanyaan uji:** apakah endpoint memeriksa kepemilikan order, atau hanya mencari ID global?
+- **Baseline:** sebagai Budi, buka order miliknya dari riwayat. Catat ID pada path, pemilik yang diharapkan, dan bentuk response.
+- **Eksperimen:** ubah hanya ID path ke order seed lain yang disebut materi; jangan enumerasi ID di luar fixture. Sesi tetap Budi.
+- **Bukti:** response hanya membuktikan IDOR jika body benar-benar menunjukkan isi order milik akun lain. Pada Secure, endpoint mengikat pencarian pada `user_id` dari sesi dan hasil foreign tidak boleh bocor.
+- **Perilaku error:** 404 dapat menghindari pengungkapan keberadaan objek, sedangkan 403 juga dapat valid bila kebijakan aplikasi membedakan objek yang ada. Yang penting adalah tidak memberikan data tanpa izin.
+
+## Bukti yang Dicatat
+- Label akun sesi, ID order milik sendiri dan fixture pembanding, status, serta nama field/produk yang terlihat.
+- Hasil own-object sebagai kontrol positif dan hasil foreign-object pada mode Secure.
+- Rekomendasi query yang menggabungkan ID objek dengan pemilik yang terautentikasi.
+
 ## Langkah latihan
 1. Masuk sebagai Budi (`budi` / `budi123`).
 2. Buka pesanan Budi dari menu riwayat, lalu perhatikan angka di alamat `/order/...`.
