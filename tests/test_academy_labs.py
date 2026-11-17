@@ -220,16 +220,60 @@ def test_practitioner_settlement_binds_server_total_and_consumes_quote_once(clie
 def test_practitioner_webhook_replay_is_idempotent_in_secure_mode(client):
     event = {"event_id": "evt-training-01", "amount": "50000"}
     headers = {"X-Training-Signature": "fixture-valid"}
-    client.post("/extra/academy/webhook-replay-chain", data=event, headers=headers)
+    invalid_signature = client.post(
+        "/extra/academy/webhook-replay-chain",
+        data=event,
+        headers={"X-Training-Signature": "invalid"},
+    )
+    assert invalid_signature.status_code == 401
+    invalid_fixture = client.post(
+        "/extra/academy/webhook-replay-chain",
+        data={**event, "amount": "1"},
+        headers=headers,
+    )
+    assert invalid_fixture.status_code == 400
+
+    first = client.post("/extra/academy/webhook-replay-chain", data=event, headers=headers)
+    assert first.status_code == 200
+    assert first.json["accepted"] is True
+    assert first.json["duplicate"] is False
+    assert first.json["eventId"] == "evt-training-01"
+    assert first.json["creditCount"] == 1
+    assert first.json["creditedAmount"] == 50000
+    assert "X-Lab-Flag" not in first.headers
     replay = client.post("/extra/academy/webhook-replay-chain", data=event, headers=headers)
+    assert replay.status_code == 200
+    assert replay.json["accepted"] is True
+    assert replay.json["duplicate"] is True
+    assert replay.json["eventId"] == "evt-training-01"
+    assert replay.json["creditedAmount"] == 50000
     assert replay.json["creditCount"] == 2
     assert "X-Lab-Flag" in replay.headers
 
     enable_secure_mode(client)
+    invalid_signature = client.post(
+        "/extra/academy/webhook-replay-chain",
+        data=event,
+        headers={"X-Training-Signature": "invalid"},
+    )
+    assert invalid_signature.status_code == 401
+    invalid_fixture = client.post(
+        "/extra/academy/webhook-replay-chain",
+        data={**event, "amount": "1"},
+        headers=headers,
+    )
+    assert invalid_fixture.status_code == 400
     first = client.post("/extra/academy/webhook-replay-chain", data=event, headers=headers)
+    assert first.status_code == 200
+    assert first.json["accepted"] is True
+    assert first.json["duplicate"] is False
+    assert first.json["eventId"] == "evt-training-01"
     assert first.json["creditCount"] == 1
+    assert first.json["creditedAmount"] == 50000
     replay = client.post("/extra/academy/webhook-replay-chain", data=event, headers=headers)
     assert replay.status_code == 409
+    assert replay.json["accepted"] is False
+    assert replay.json["duplicate"] is True
     assert replay.json["creditCount"] == 1
     assert "X-Lab-Flag" not in replay.headers
 

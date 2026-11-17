@@ -40,6 +40,15 @@
       <li><strong>Ulangi kontrol sah dan bandingkan Secure.</strong> {{ lab['burp_guide']['secure'] }} Ganti mode melalui UI, lalu tangkap request baru agar sesi/mode yang digunakan benar. Untuk alur bertahap, ulangi dari request pertama; jangan memakai state yang dibuat pada mode sebelumnya.</li>
       <li><strong>Tutup eksperimen dengan bukti minimal.</strong> Gunakan daftar <a href="#praktikum">langkah lab</a> dan <a href="#bukti-lab">bukti yang perlu dicatat</a> di halaman ini. Jangan mengulang POST yang mengubah state kecuali langkah lab meminta; jangan masukkan nilai cookie/token ke catatan.</li>
     </ol>
+    <h3>Bandingkan baseline, eksperimen, dan Secure</h3>
+    <p>Gunakan urutan ini untuk menilai hasil lab ini. Isi kolom response berdasarkan field yang benar-benar dikembalikan endpoint; jangan menyimpulkan dampak hanya dari status HTTP.</p>
+    <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Tahap</th><th>Request / state</th><th>Yang dibandingkan</th><th>Arti</th></tr></thead><tbody>
+      <tr><td><strong>Baseline</strong></td><td>{{ lab['burp_guide']['baseline'] }}</td><td>Status, header, body/JSON/HTML, dan state sebelum eksperimen.</td><td>Memastikan format request, sesi, dan prasyarat lab benar sebelum input diuji.</td></tr>
+      <tr><td><strong>Eksperimen terkontrol</strong></td><td>{{ lab['burp_guide']['exercise'] }}</td><td>{{ lab['burp_guide']['analysis'] }}</td><td>Perbedaan hanya dapat diatribusikan pada field/aksi yang diubah bila request lain dan state tetap sebanding.</td></tr>
+      <tr><td><strong>Perbandingan Secure</strong></td><td>{{ lab['burp_guide']['secure'] }}</td><td>Ulangi input yang sama dengan request baru setelah mode diganti; bandingkan field response dan state, bukan pesan sukses saja.</td><td>Pastikan Secure menolak perilaku yang tidak diizinkan tanpa merusak jalur sah yang menjadi kontrol.</td></tr>
+      <tr><td><strong>Kontrol negatif (jika diminta)</strong></td><td>Gunakan hanya nilai tidak valid yang disebut materi lab; jangan menebak input tambahan.</td><td>Status penolakan, body error, dan apakah state tetap tidak berubah.</td><td>Memastikan penolakan terjadi sebelum efek samping. Untuk lab tanpa kontrol negatif, lewati tahap ini.</td></tr>
+    </tbody></table></div>
+    <div class="stuck-note"><strong>Bedakan indikator response</strong><p><code>status</code> menunjukkan keputusan HTTP, field seperti <code>accepted</code>/<code>duplicate</code> menjelaskan keputusan bisnis, header flag menandai kondisi latihan, dan counter/state menunjukkan efek yang tercatat. Nama dan makna field berbeda di setiap lab; gunakan penjelasan khusus di atas, bukan asumsi dari lab lain.</p></div>
     {% if lesson['steps'] %}<h3>Urutan aksi browser yang harus kamu tangkap untuk lab ini</h3>
     <p>Daftar berikut berasal dari langkah praktikum <strong>{{ lab['title'] }}</strong>. Jalankan satu per satu pada browser Burp, lalu gunakan request target di atas untuk membangun baseline atau mengirim tahap berikutnya di Repeater.</p>
     <ol class="practice-steps">{% for step in lesson['steps'] %}<li>{{ step }}</li>{% endfor %}</ol>{% endif %}

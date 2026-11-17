@@ -35,6 +35,8 @@ def test_every_lab_has_material_hints_solution_and_side_by_side_diff(client):
         assert b"Lakukan eksperimen lab, satu perubahan saja" in response.data, lab_id
         assert b"Urutan aksi browser yang harus kamu tangkap untuk lab ini" in response.data, lab_id
         assert b"Checklist bukti khusus lab ini" in response.data, lab_id
+        assert b"Bandingkan baseline, eksperimen, dan Secure" in response.data, lab_id
+        assert b"Bedakan indikator response" in response.data, lab_id
         assert b"Kalau mentok: diagnosis langkah demi langkah" in response.data, lab_id
         assert b"Request tidak muncul di HTTP history" in response.data, lab_id
         assert b"Repeater mendapat redirect login, 401" in response.data, lab_id
@@ -91,6 +93,23 @@ def test_sqli_union_lesson_explains_burp_request_and_secure_comparison(client):
     assert b"empat kolom" in response.data
     assert b"mode Vulnerable" in response.data
     assert b"mode Secure" in response.data
+
+
+def test_webhook_replay_lesson_explains_request_and_counter_comparison(client):
+    response = client.get("/labs/webhook-replay-chain")
+    assert response.status_code == 200
+    for expected in (
+        b"event_id=evt-training-01&amp;amount=50000",
+        b"X-Training-Signature: fixture-valid",
+        b"duplicate=false",
+        b"duplicate=true",
+        b"creditCount=1",
+        b"creditCount=2",
+        b"creditCount tetap 1",
+        b"bukan uang",
+        b"status 409",
+    ):
+        assert expected in response.data, expected
 
 
 def test_hints_open_one_at_a_time_and_solution_is_revealed_on_request(client):

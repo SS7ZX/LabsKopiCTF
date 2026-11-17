@@ -385,8 +385,8 @@ LAB_SYSTEM_GUIDES = {
             "Mengamati bagaimana event ID duplikat dapat menggandakan efek simulasi.",
         ],
         "flow": "POST form + X-Training-Signature -> evaluator memeriksa event/amount fixture dan marker -> session menyimpan daftar event -> response memberi creditCount/duplicate.",
-        "state": "Daftar event disimpan di session terpisah untuk mode Vulnerable dan Secure; tidak ada saldo atau integrasi webhook. fixture-valid bukan signature kriptografis.",
-        "reasoning": "Kirim event valid sekali lalu replay request identik satu kali. Counter naik dan flag hanya pada duplikat Vulnerable; Secure menerima pertama lalu 409 tanpa menaikkan counter.",
+        "state": "Daftar event disimpan dalam session, dengan key terpisah untuk mode Vulnerable dan Secure. creditCount adalah panjang daftar pemrosesan fixture, bukan uang atau saldo. Tidak ada integrasi webhook; fixture-valid bukan signature kriptografis.",
+        "reasoning": "Kirim POST form-urlencoded dengan event_id=evt-training-01, amount=50000, dan X-Training-Signature: fixture-valid. Response pertama pada kedua mode: accepted=true, duplicate=false, creditCount=1. Kirim request identik sekali lagi: Vulnerable menjawab accepted=true, duplicate=true, count=2 serta flag; Secure menjawab 409, accepted=false, duplicate=true, count tetap 1 tanpa flag. Ubah satu field saja hanya saat menjalankan kontrol negatif 400/401.",
     },
     "graphql-resolver-chain": {
         "objectives": [
